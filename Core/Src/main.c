@@ -21,6 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "API_delay.h"
+#include "API_LCD.h"
 
 /* USER CODE END Includes */
 
@@ -82,6 +84,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
+  LCDInint();
 
   /* USER CODE END Init */
 
@@ -98,15 +101,28 @@ int main(void)
   MX_I2C3_Init();
   MX_SPI3_Init();
   /* USER CODE BEGIN 2 */
-
+  LCDInint();
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+
+
+
   while (1)
   {
     /* USER CODE END WHILE */
 
+HAL_Delay(312);
+HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);////////////////////////////////////////////////////////////////////////////////////////*/////////////////////
+
+
+LCDWRITECARACTER('h');
+
+
+
+//HAL_I2C_Master_Transmit(&hi2c3, 0X27 << 1, 0XF2, 1, HAL_MAX_DELAY);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
