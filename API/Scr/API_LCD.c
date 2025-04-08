@@ -2,7 +2,7 @@
  * API_LCD.c
  *
  *  Created on: Apr 1, 2025
- *      Author: mariano
+ *      Author: Mariano Deville
  */
 
 #include "API_LCD.h"
