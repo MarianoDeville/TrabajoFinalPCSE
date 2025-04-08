@@ -2,7 +2,7 @@
  * API_LCD.h
  *
  *  Created on: Apr 1, 2025
- *      Author: mariano
+ *      Author: Mariano Deville
  */
 
 #ifndef API_INC_API_LCD_H_

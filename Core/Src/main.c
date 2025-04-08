@@ -23,6 +23,7 @@
 /* USER CODE BEGIN Includes */
 #include "API_delay.h"
 #include "API_LCD.h"
+#include "API_UART.h"
 
 /* USER CODE END Includes */
 
@@ -33,6 +34,7 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
+#define	RX_MSG_SIZE		1
 
 /* USER CODE END PD */
 
@@ -43,13 +45,12 @@
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c3;
-
 SPI_HandleTypeDef hspi3;
-
 UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart2;
 
 /* USER CODE BEGIN PV */
+puerto_UART puerto_UART1;
 
 /* USER CODE END PV */
 
@@ -105,6 +106,10 @@ int main(void)
   MX_UART5_Init();
   /* USER CODE BEGIN 2 */
   LCDInint();
+  if(!uartInit(&puerto_UART1, &huart5))
+	  Error_Handler();
+  uartReceiveStringSize(&puerto_UART1, RX_MSG_SIZE);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -358,6 +363,10 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
+void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
+
+	uartReceiveStringSize(&puerto_UART1, RX_MSG_SIZE);
+}
 
 /* USER CODE END 4 */
 
