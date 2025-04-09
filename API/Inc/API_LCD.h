@@ -45,6 +45,6 @@
 
 
 void LCDInint(void);
-void LCDWRITECARACTER(const uint8_t * caracter);
-
+void LCDWRITECARACTER(uint8_t * caracter);
+void LCDClear(void);
 #endif /* API_INC_API_LCD_H_ */

@@ -39,7 +39,7 @@ bool_t uartInit(puerto_UART * data_port, UART_HandleTypeDef * huart) {
   * @param  Puntero a la cadena que se desea enviar.
   * @retval Devuelvo la información del resultado de la transmisión
   */
-Estado_TX_RX uartSendString(puerto_UART * data_port, char * pstring) {
+Estado_TX_RX uartSendString(puerto_UART * data_port, uint8_t * pstring) {
 
 	if(pstring == NULL)
 		return BUFFER_VACIO;
@@ -55,7 +55,7 @@ Estado_TX_RX uartSendString(puerto_UART * data_port, char * pstring) {
   * @param  Tamaño de la cadena a enviar.
   * @retval Devuelvo la información del resultado de la transmisión.
   */
-Estado_TX_RX uartSendStringSize(puerto_UART * data_port, char * pstring, uint16_t size) {
+Estado_TX_RX uartSendStringSize(puerto_UART * data_port, uint8_t * pstring, uint16_t size) {
 
 	if(pstring == NULL)
 			return BUFFER_VACIO;
@@ -106,12 +106,13 @@ bool_t isNewMessage(puerto_UART * data_port) {
   */
 bool_t muestroConfiguracion(puerto_UART * data_port) {
 
-	if(uartSendString(data_port, CLEAR_SCREEN_AND_HOME
-							"Puerto: UART5" CRLF
-							"Baud rate: 115200" CRLF
-							"Palabra de dato: 8 bits" CRLF
-							"Paridad: sin" CRLF
-							"Stop bit: 1\n" CRLF) != OK)
+	uint8_t mensaje[] = CLEAR_SCREEN_AND_HOME
+						"Puerto: UART5" CRLF
+						"Baud rate: 115200" CRLF
+						"Palabra de dato: 8 bits" CRLF
+						"Paridad: sin" CRLF
+						"Stop bit: 1\n" CRLF;
+	if(uartSendString(data_port, mensaje) != OK)
 		return false;
 	return true;
 }

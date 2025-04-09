@@ -18,6 +18,7 @@
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
+#include "string.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -118,18 +119,33 @@ int main(void)
 
 
 
-  while (1)
-  {
-    /* USER CODE END WHILE */
+	while (1) {
+	/* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+	/* USER CODE BEGIN 3 */
 
-	  HAL_Delay(312);
-	  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);////////////////////////////////////////////////////////////////////////////////////////*/////////////////////
+		HAL_Delay(312);
+		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);////////////////////////////////////////////////////////////////////////////////////////*/////////////////////
+
+		if(isNewMessage(&puerto_UART1)) {
+
+			LCDWRITECARACTER(&puerto_UART1.rx_buff[0]);
+			uartSendString(&puerto_UART1, puerto_UART1.rx_buff);
 
 
-	  LCDWRITECARACTER('h');
-  }
+			if(puerto_UART1.rx_buff[0] == 'c') {
+
+				LCDClear();
+				muestroConfiguracion(&puerto_UART1);
+			}
+
+
+			memset(puerto_UART1.rx_buff, 0, sizeof(puerto_UART1.rx_buff));/////////////////////////////////////////////////////////////////////////////////////
+
+		}
+
+
+	}
   /* USER CODE END 3 */
 }
 
