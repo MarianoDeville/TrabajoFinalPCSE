@@ -7,6 +7,15 @@
 #include "API_UART.h"
 #include "string.h"
 
+#define TIME_OUT_UART	512
+
+const uint8_t mensaje_inicial[] = CLEAR_SCREEN_AND_HOME
+									"Puerto: UART5" CRLF
+									"Baud rate: 115200" CRLF
+									"Palabra de dato: 8 bits" CRLF
+									"Paridad: sin" CRLF
+									"Stop bit: 1\n" CRLF;
+
 /**
   * @brief  Inicialización del puerto serie.
   * @param  Puntero a la estructura que contiene las variabes del puerto seleccionado.
@@ -27,10 +36,7 @@ bool_t uartInit(puerto_UART * data_port, UART_HandleTypeDef * huart) {
 
 	if(HAL_UART_Init(data_port->puerto) != HAL_OK)
 	    return false;
-
-	if(!muestroConfiguracion(data_port))
-	    return false;
-	return true;
+    return muestroConfiguracion(data_port);
 }
 
 /**
@@ -39,7 +45,7 @@ bool_t uartInit(puerto_UART * data_port, UART_HandleTypeDef * huart) {
   * @param  Puntero a la cadena que se desea enviar.
   * @retval Devuelvo la información del resultado de la transmisión
   */
-Estado_TX_RX uartSendString(puerto_UART * data_port, uint8_t * pstring) {
+Estado_TX_RX uartSendString(puerto_UART * data_port, const uint8_t * pstring) {
 
 	if(pstring == NULL)
 		return BUFFER_VACIO;
@@ -55,7 +61,7 @@ Estado_TX_RX uartSendString(puerto_UART * data_port, uint8_t * pstring) {
   * @param  Tamaño de la cadena a enviar.
   * @retval Devuelvo la información del resultado de la transmisión.
   */
-Estado_TX_RX uartSendStringSize(puerto_UART * data_port, uint8_t * pstring, uint16_t size) {
+Estado_TX_RX uartSendStringSize(puerto_UART * data_port, const uint8_t * pstring, uint16_t size) {
 
 	if(pstring == NULL)
 			return BUFFER_VACIO;
@@ -65,7 +71,7 @@ Estado_TX_RX uartSendStringSize(puerto_UART * data_port, uint8_t * pstring, uint
 	if(size > MAX_TX_BUFFER)
 		return ERROR_SIZE;
 
-	if(HAL_UART_Transmit(data_port->puerto, (uint8_t *)pstring, size, HAL_MAX_DELAY) != HAL_OK)
+	if(HAL_UART_Transmit(data_port->puerto, (uint8_t *)pstring, size, TIME_OUT_UART) != HAL_OK)
 		return ERROR_TRANSMISION;
 	return OK;
 }
@@ -106,13 +112,7 @@ bool_t isNewMessage(puerto_UART * data_port) {
   */
 bool_t muestroConfiguracion(puerto_UART * data_port) {
 
-	uint8_t mensaje[] = CLEAR_SCREEN_AND_HOME
-						"Puerto: UART5" CRLF
-						"Baud rate: 115200" CRLF
-						"Palabra de dato: 8 bits" CRLF
-						"Paridad: sin" CRLF
-						"Stop bit: 1\n" CRLF;
-	if(uartSendString(data_port, mensaje) != OK)
+	if(uartSendString(data_port, mensaje_inicial) != OK)
 		return false;
 	return true;
 }

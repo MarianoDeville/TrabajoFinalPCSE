@@ -49,8 +49,8 @@ typedef enum {
  * Prototipo de funciones públicas.
  */
 bool_t uartInit(puerto_UART * data_port, UART_HandleTypeDef * huart);
-Estado_TX_RX uartSendString(puerto_UART * data_port, uint8_t * pstring);
-Estado_TX_RX uartSendStringSize(puerto_UART * data_port, uint8_t * pstring, uint16_t size);
+Estado_TX_RX uartSendString(puerto_UART * data_port, const uint8_t * pstring);
+Estado_TX_RX uartSendStringSize(puerto_UART * data_port, const uint8_t * pstring, uint16_t size);
 void uartReceiveStringSize(puerto_UART * data_port, uint16_t size);
 bool_t isNewMessage(puerto_UART * data_port);
 bool_t muestroConfiguracion(puerto_UART * data_port);

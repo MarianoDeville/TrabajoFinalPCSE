@@ -9,10 +9,10 @@
 #define INC_COMPATIBILITY_H_
 
 #include "stdbool.h"
-
+#include "main.h"
 /**
  * Macros
  */
-typedef bool bool_t;
+#define  delay_t(x) HAL_Delay(x)
 
 #endif /* INC_COMPATIBILITY_H_ */

@@ -10,7 +10,7 @@
 /**
  * Prototipo de funciones privadas.
  */
-static bool_t DelayIsRunning(delay_t * delay);
+static bool_t DelayIsRunning(delay_no_bloqueante * delay);
 
 /**
   * @brief  Inicializa el delay no bloqueante.
@@ -18,7 +18,7 @@ static bool_t DelayIsRunning(delay_t * delay);
   * @param  Duración del delay.
   * @retval None
   */
-void DelayInit(delay_t * delay, tick_t duration) {
+void DelayInit(delay_no_bloqueante * delay, tick_t duration) {
 
 	if(delay == NULL || duration == 0) {
 
@@ -35,7 +35,7 @@ void DelayInit(delay_t * delay, tick_t duration) {
   * @param  Duración del delay.
   * @retval Estado del delay (contando / tiempo cumplido).
   */
-bool_t DelayRead(delay_t * delay) {
+bool_t DelayRead(delay_no_bloqueante * delay) {
 
 	if(delay == NULL) {
 
@@ -64,7 +64,7 @@ bool_t DelayRead(delay_t * delay) {
   * @param  Duración del delay.
   * @retval None
   */
-void DelayWrite( delay_t * delay, tick_t duration ) {
+void DelayWrite( delay_no_bloqueante * delay, tick_t duration ) {
 
 	if(delay == NULL || duration == 0) {
 
@@ -83,7 +83,7 @@ void DelayWrite( delay_t * delay, tick_t duration ) {
   * 		el encapsulamiento la defino como privada ya que solo se utiliza en el
   * 		ámbito de este archivo.
   */
-static bool_t DelayIsRunning(delay_t * delay) {
+static bool_t DelayIsRunning(delay_no_bloqueante * delay) {
 
 	if(delay == NULL) {
 
