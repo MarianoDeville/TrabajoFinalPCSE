@@ -15,4 +15,18 @@
  */
 #define  delay_t(x) HAL_Delay(x)
 
+
+/**
+ * Respuestas de las funciones de envío de datos.
+ */
+typedef enum {
+
+	OK,
+	BUFFER_VACIO,
+	SIN_DATOS,
+	ERROR_SIZE,
+	ERROR_TRANSMISION,
+}Estado_TX_RX;
+
+
 #endif /* INC_COMPATIBILITY_H_ */

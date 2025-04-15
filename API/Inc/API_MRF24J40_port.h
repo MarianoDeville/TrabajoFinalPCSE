@@ -13,6 +13,8 @@
 //#include "drv_mspi_port.h"
 //#include "../../redef_var.h"
 
+
+
 /* Prototipo de funciones públicas -------------------------------------------*/
 void InicializoPines(void);
 void SetCSPin(bool_t estado);

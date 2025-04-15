@@ -21,12 +21,12 @@ const uint8_t mensaje_inicial[] = CLEAR_SCREEN_AND_HOME
   * @param  Puntero a la estructura que contiene las variabes del puerto seleccionado.
   * @retval Devuelvo verdadero si la inicialización se realizo sin problemas.
   */
-bool_t uartInit(puerto_UART * data_port, UART_HandleTypeDef * huart) {
+bool_t UARTtInit(puerto_UART * data_port, UART_HandleTypeDef * huart) {
 
 	data_port->mensaje_recibido = false;
 	data_port->puerto = huart;
 	data_port->puerto->Instance = UART5;
-	data_port->puerto->Init.BaudRate = BAUDE_RATE;
+	data_port->puerto->Init.BaudRate = BAUDE_RATE_UART;
 	data_port->puerto->Init.WordLength = UART_WORDLENGTH_8B;
 	data_port->puerto->Init.StopBits = UART_STOPBITS_1;
 	data_port->puerto->Init.Parity = UART_PARITY_NONE;
@@ -36,7 +36,7 @@ bool_t uartInit(puerto_UART * data_port, UART_HandleTypeDef * huart) {
 
 	if(HAL_UART_Init(data_port->puerto) != HAL_OK)
 	    return false;
-    return muestroConfiguracion(data_port);
+    return PutConfiguration(data_port);
 }
 
 /**
@@ -45,12 +45,12 @@ bool_t uartInit(puerto_UART * data_port, UART_HandleTypeDef * huart) {
   * @param  Puntero a la cadena que se desea enviar.
   * @retval Devuelvo la información del resultado de la transmisión
   */
-Estado_TX_RX uartSendString(puerto_UART * data_port, const uint8_t * pstring) {
+Estado_TX_RX UARTSendString(puerto_UART * data_port, const uint8_t * pstring) {
 
 	if(pstring == NULL)
 		return BUFFER_VACIO;
 	uint16_t size = strlen((char *)pstring);
-	uartSendStringSize(data_port, pstring, size);
+	UARTSendStringSize(data_port, pstring, size);
 	return OK;
 }
 
@@ -61,14 +61,14 @@ Estado_TX_RX uartSendString(puerto_UART * data_port, const uint8_t * pstring) {
   * @param  Tamaño de la cadena a enviar.
   * @retval Devuelvo la información del resultado de la transmisión.
   */
-Estado_TX_RX uartSendStringSize(puerto_UART * data_port, const uint8_t * pstring, uint16_t size) {
+Estado_TX_RX UARTSendStringSize(puerto_UART * data_port, const uint8_t * pstring, uint16_t size) {
 
 	if(pstring == NULL)
 			return BUFFER_VACIO;
 	if(size == 0)
 		return SIN_DATOS;
 
-	if(size > MAX_TX_BUFFER)
+	if(size > MAX_TX_BUFFER_UART)
 		return ERROR_SIZE;
 
 	if(HAL_UART_Transmit(data_port->puerto, (uint8_t *)pstring, size, TIME_OUT_UART) != HAL_OK)
@@ -83,7 +83,7 @@ Estado_TX_RX uartSendStringSize(puerto_UART * data_port, const uint8_t * pstring
   * @param  Tamaño de la cadena que se espera entre.
   * @retval None.
   */
-void uartReceiveStringSize(puerto_UART * data_port, uint16_t size) {
+void UARTReceiveStringSize(puerto_UART * data_port, uint16_t size) {
 
 	HAL_UART_Receive_IT(data_port->puerto, data_port->rx_buff, size);
 	data_port->mensaje_recibido = true;
@@ -95,7 +95,7 @@ void uartReceiveStringSize(puerto_UART * data_port, uint16_t size) {
   * @param  Puntero a la estructura que contiene las variabes del puerto.
   * @retval Booleano indicando la llegada.
   */
-bool_t isNewMessage(puerto_UART * data_port) {
+bool_t IsNewMessage(puerto_UART * data_port) {
 
 	if(data_port->mensaje_recibido) {
 
@@ -110,9 +110,9 @@ bool_t isNewMessage(puerto_UART * data_port) {
   * @param  Puntero a la estructura que contiene las variabes del puerto.
   * @retval Devuelvo la información del resultado de la transmisión.
   */
-bool_t muestroConfiguracion(puerto_UART * data_port) {
+bool_t PutConfiguration(puerto_UART * data_port) {
 
-	if(uartSendString(data_port, mensaje_inicial) != OK)
+	if(UARTSendString(data_port, mensaje_inicial) != OK)
 		return false;
 	return true;
 }

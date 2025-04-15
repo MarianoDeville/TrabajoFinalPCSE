@@ -11,9 +11,11 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "API_MRF24J40_port.h"
+#include "API_SPI.h"
 #include "main.h"
 
-extern SPI_HandleTypeDef hspi3;
+
+extern puerto_SPI puerto_SPI1;
 /**
  * @brief  Inicialización del hardware relacionado con el módulo
  * @param  None
@@ -34,8 +36,7 @@ void InicializoPines(void){
  */
 void SetCSPin(bool_t estado){
 
- //   MRF24_CS = estado;
-	HAL_GPIO_WritePin(MRF24_CS_GPIO_Port, MRF24_CS_Pin, estado);
+ 	HAL_GPIO_WritePin(MRF24_CS_GPIO_Port, MRF24_CS_Pin, estado);
     return;
 }
 
@@ -46,8 +47,7 @@ void SetCSPin(bool_t estado){
  */
 void SetWakePin(bool_t estado){
 
- //   MRF24_WAKE = estado;
-	HAL_GPIO_WritePin(MRF24_WAKE_GPIO_Port, MRF24_WAKE_Pin, estado);
+ 	HAL_GPIO_WritePin(MRF24_WAKE_GPIO_Port, MRF24_WAKE_Pin, estado);
     return;
 }
 
@@ -58,8 +58,7 @@ void SetWakePin(bool_t estado){
  */
 void SetResetPin(bool_t estado){
 
- //   MRF24_RESET = estado;
-	HAL_GPIO_WritePin(MRF24_RESET_GPIO_Port, MRF24_RESET_Pin, estado);
+ 	HAL_GPIO_WritePin(MRF24_RESET_GPIO_Port, MRF24_RESET_Pin, estado);
     return;
 }
 
@@ -79,8 +78,8 @@ bool_t IsMRF24Interrup(void) {
  */
 void WriteByteSPIPort(uint8_t dato){
 
-//    SPIWriteByte(dato);
-	HAL_SPI_Transmit(&hspi3, dato, 1, 120);
+	SPISend(&puerto_SPI1, &dato, _1_BYTE);
+//	HAL_SPI_Transmit(&hspi3, &dato, _1_BYTE, TIME_OUT_SPI);
     return;
 }
 
@@ -91,8 +90,8 @@ void WriteByteSPIPort(uint8_t dato){
  */
 void Write2ByteSPIPort(uint16_t dato){
 
- //   SPIWrite2Byte(dato);
-	HAL_SPI_Transmit(&hspi3, dato, 2, 120);
+	SPISend(&puerto_SPI1, &dato, _2_BYTES);
+// 	HAL_SPI_Transmit(&hspi3, &dato, _2_BYTES, TIME_OUT_SPI);
     return;
 }
 
@@ -103,6 +102,12 @@ void Write2ByteSPIPort(uint16_t dato){
  */
 uint8_t ReadByteSPIPort(void){
 
+	//while();
 //    return SPIRead();
-return 0;
+	uint8_t dato;
+
+//	HAL_SPI_Receive(&hspi3, &dato, _2_BYTES, TIME_OUT_SPI);
+
+
+	return dato;
 }
