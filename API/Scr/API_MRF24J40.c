@@ -290,7 +290,6 @@ void MRF24J40Init(void) {
     delay_t(1);
     SetResetPin(1);
     delay_t(1);
-GetShortAddr(0x00);
     SetShortAddr(SOFTRST,0x07);
 
     do {

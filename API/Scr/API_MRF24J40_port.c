@@ -11,11 +11,13 @@
 
 /* Includes ------------------------------------------------------------------*/
 #include "API_MRF24J40_port.h"
-#include "API_SPI.h"
 #include "main.h"
 
+#define _1_BYTE			0x01
+#define _2_BYTES		0x02
+#define TIME_OUT_SPI	100
 
-extern puerto_SPI puerto_SPI1;
+extern SPI_HandleTypeDef hspi3;
 /**
  * @brief  Inicialización del hardware relacionado con el módulo
  * @param  None
@@ -78,8 +80,7 @@ bool_t IsMRF24Interrup(void) {
  */
 void WriteByteSPIPort(uint8_t dato){
 
-	SPISend(&puerto_SPI1, &dato, _1_BYTE);
-//	HAL_SPI_Transmit(&hspi3, &dato, _1_BYTE, TIME_OUT_SPI);
+	HAL_SPI_Transmit(&hspi3, &dato, _1_BYTE, TIME_OUT_SPI);
     return;
 }
 
@@ -90,8 +91,7 @@ void WriteByteSPIPort(uint8_t dato){
  */
 void Write2ByteSPIPort(uint16_t dato){
 
-	SPISend(&puerto_SPI1, &dato, _2_BYTES);
-// 	HAL_SPI_Transmit(&hspi3, &dato, _2_BYTES, TIME_OUT_SPI);
+	HAL_SPI_Transmit(&hspi3, &dato, _2_BYTES, TIME_OUT_SPI);
     return;
 }
 
@@ -102,12 +102,7 @@ void Write2ByteSPIPort(uint16_t dato){
  */
 uint8_t ReadByteSPIPort(void){
 
-	//while();
-//    return SPIRead();
-	uint8_t dato;
-
-//	HAL_SPI_Receive(&hspi3, &dato, _2_BYTES, TIME_OUT_SPI);
-
-
+	uint8_t dato = 0x01;
+	HAL_SPI_Receive(&hspi3, &dato, _1_BYTE, TIME_OUT_SPI);
 	return dato;
 }

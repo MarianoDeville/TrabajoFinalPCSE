@@ -26,7 +26,6 @@
 #include "API_delay.h"
 #include "API_LCD.h"
 #include "API_UART.h"
-#include "API_SPI.h"
 #include "API_MRF24J40.h"
 
 /* USER CODE END Includes */
@@ -50,12 +49,11 @@
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c3;
 SPI_HandleTypeDef hspi3;
-UART_HandleTypeDef huart5;
 UART_HandleTypeDef huart2;
+UART_HandleTypeDef huart5;
 
 /* USER CODE BEGIN PV */
 puerto_UART puerto_UART1;
-puerto_SPI	puerto_SPI1;
 
 /* USER CODE END PV */
 
@@ -64,6 +62,7 @@ void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
 static void MX_I2C3_Init(void);
+static void MX_SPI3_Init(void);
 
 /* USER CODE BEGIN PFP */
 
@@ -91,7 +90,8 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  LCDInint();
+  delay_no_bloqueante delay_parpadeo;
+
 
   /* USER CODE END Init */
 
@@ -106,18 +106,15 @@ int main(void)
   MX_GPIO_Init();
   MX_USART2_UART_Init();
   MX_I2C3_Init();
+  MX_SPI3_Init();
 
   /* USER CODE BEGIN 2 */
+  DelayInit(&delay_parpadeo, 250);
   if(!UARTtInit(&puerto_UART1, &huart5))
   	  Error_Handler();
-  if(!SPIInit(&puerto_SPI1, &hspi3))
-	  Error_Handler();
   LCDInint();
   MRF24J40Init();
-
-
   UARTReceiveStringSize(&puerto_UART1, RX_MSG_SIZE);
-  SPIReceiveStringSize(&puerto_SPI1, RX_MSG_SIZE);
 
   /* USER CODE END 2 */
 
@@ -132,8 +129,6 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
-		delay_t(312);
-		HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);////////////////////////////////////////////////////////////////////////////////////////*/////////////////////
 
 		if(IsNewMessage(&puerto_UART1)) {
 
@@ -149,6 +144,8 @@ int main(void)
 			memset(puerto_UART1.rx_buff, 0, sizeof(puerto_UART1.rx_buff));/////////////////////////////////////////////////////////////////////////////////////
 		}
 
+		if(DelayRead(&delay_parpadeo))
+			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	}
   /* USER CODE END 3 */
 }
@@ -235,6 +232,44 @@ static void MX_I2C3_Init(void)
 }
 
 /**
+  * @brief SPI3 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_SPI3_Init(void)
+{
+
+  /* USER CODE BEGIN SPI3_Init 0 */
+
+  /* USER CODE END SPI3_Init 0 */
+
+  /* USER CODE BEGIN SPI3_Init 1 */
+
+  /* USER CODE END SPI3_Init 1 */
+  /* SPI3 parameter configuration*/
+  hspi3.Instance = SPI3;
+  hspi3.Init.Mode = SPI_MODE_MASTER;
+  hspi3.Init.Direction = SPI_DIRECTION_2LINES;
+  hspi3.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi3.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi3.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi3.Init.NSS = SPI_NSS_SOFT;
+  hspi3.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_128;
+  hspi3.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi3.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi3.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi3.Init.CRCPolynomial = 10;
+  if (HAL_SPI_Init(&hspi3) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN SPI3_Init 2 */
+
+  /* USER CODE END SPI3_Init 2 */
+
+}
+
+/**
   * @brief USART2 Initialization Function
   * @param None
   * @retval None
@@ -317,10 +352,6 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart) {
 	UARTReceiveStringSize(&puerto_UART1, RX_MSG_SIZE);
 }
 
-void HAL_SPI_RxCpltCallback(SPI_HandleTypeDef *hspi) {
-
-	SPIReceiveStringSize(&puerto_SPI1, RX_MSG_SIZE);
-}
 /* USER CODE END 4 */
 
 /**
