@@ -95,7 +95,7 @@ void UARTReceiveStringSize(puerto_UART * data_port, uint16_t size) {
   * @param  Puntero a la estructura que contiene las variabes del puerto.
   * @retval Booleano indicando la llegada.
   */
-bool_t IsNewMessage(puerto_UART * data_port) {
+bool_t UARTIsNewMessage(puerto_UART * data_port) {
 
 	if(data_port->mensaje_recibido) {
 

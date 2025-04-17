@@ -18,26 +18,29 @@
 
 /* Definiciones de la configuración por defecto ------------------------------*/
 #define	DEFAULT_CHANNEL     CH_11
-#define DEFAULT_SEC_NUMBER  0X01
-#define	MY_DEFAULT_PAN_ID	0x1234
-#define	MY_DEFAULT_ADDRESS	0xDE11
+#define DEFAULT_SEC_NUMBER  (0X01)
+#define	MY_DEFAULT_PAN_ID	(0x1234)
+#define	MY_DEFAULT_ADDRESS	(0xDEFA)
 
-#define HEAD_LENGTH         0X0E
-#define WRITE_16_BITS       0X8010
-#define READ_16_BITS        0X8000
-#define WRITE_8_BITS        0x01
-#define READ_8_BITS         0x7E
+#define HEAD_LENGTH         (0X0E)
+#define WRITE_16_BITS       (0X8010)
+#define READ_16_BITS        (0X8000)
+#define WRITE_8_BITS        (0x01)
+#define READ_8_BITS         (0x7E)
+#define SHIFT_LONG_ADDR		(0X05)
+#define SHIFT_SHORT_ADDR	(0X01)
+#define SHIFT_BYTE			(0X08)
 
 /* Variables privadas --------------------------------------------------------*/
 /* MAC address por defecto del dispositivo */
 static const uint8_t default_mac_address[] = {0x11,
-                                             0x28,
-                                             0x35,
-                                             0x44,
-                                             0x56,
-                                             0x66,
-                                             0x77,
-                                             0x01};
+                                              0x28,
+                                              0x35,
+                                              0x44,
+                                              0x56,
+                                              0x66,
+                                              0x77,
+                                              0x01};
 
 /* Security key por defecto del dispositivo */
 static const uint8_t default_security_key[] = {0x00,
@@ -57,74 +60,47 @@ static const uint8_t default_security_key[] = {0x00,
                                                0x14,
                                                0x15};
 
-
 /* Estructura con la información del dispositivo */
-static struct {
-
-    bool_t get_new_msg;
-    bool_t put_new_msg;
-    uint8_t sequence_number;
-    uint8_t my_channel;
-    uint8_t security_key[16];
-    uint8_t my_mac[8];
-    uint16_t my_panid;
-    uint16_t my_address;
-    uint16_t intervalo;
+static struct {	bool_t get_new_msg;
+				bool_t put_new_msg;
+				uint8_t sequence_number;
+				uint8_t my_channel;
+				uint8_t security_key[16];
+				uint8_t my_mac[8];
+				uint16_t my_panid;
+				uint16_t my_address;
+				uint16_t intervalo;
 }mrf24_data_config;
 
 /* Estructura con la información de transmisión */
-static struct {
-
-    uint16_t destinity_panid;
-    uint16_t destinity_address;
-    uint8_t largo_mensaje;
-    const char * buffer_salida;
+static struct {	uint16_t destinity_panid;
+				uint16_t destinity_address;
+				uint8_t largo_mensaje;
+				const char * buffer_salida;
 }mrf24_data_out;
 
 /* Estructura con la información de recepción */
-static struct {
-
-    uint16_t source_panid;
-    uint16_t source_address;
-    uint8_t tamano_mensaje;
-    unsigned char buffer_entrada[50];
+static struct {	uint16_t source_panid;
+				uint16_t source_address;
+				uint8_t tamano_mensaje;
+				uint8_t rssi;
+				unsigned char buffer_entrada[50];
 }mrf24_data_in;
 
-/* Canales disponibles para el IEEE 802.15.4 */
-typedef enum {
-
-    CH_11 = 0x03,
-    CH_12 = 0x13,
-    CH_13 = 0x23,
-	CH_14 = 0x33,
-	CH_15 = 0x43,
-	CH_16 = 0x53,
-	CH_17 = 0x63,
-	CH_18 = 0x73,
-	CH_19 = 0x83,
-	CH_20 = 0x93,
-	CH_21 = 0xA3,
-	CH_22 = 0xB3,
-	CH_23 = 0xC3,
-	CH_24 = 0xD3,
-	CH_25 = 0xE3,
-	CH_26 = 0xF3
-}channel_list;
-
-enum {
-    EADR0 = 0x05,
-    EADR1,
-    EADR2,
-    EADR3,
-    EADR4,
-    EADR5,
-    EADR6,
-    EADR7,
-} my_default_mac_address;
+enum {	EADR0 = 0x05,
+		EADR1,
+		EADR2,
+		EADR3,
+		EADR4,
+		EADR5,
+		EADR6,
+		EADR7
+} long_mac_address;
 
 /* Macros --------------------------------------------------------------------*/
-#define VACIO           0X00
-/* Short address registers for reading */
+#define VACIO           (0X00)
+
+/* Direcciones de los registros de 8 bits ------------------------------------*/
 #define	RXMCR			(0x00)
 #define	PANIDL			(0x01)
 #define	PANIDH			(0x02)
@@ -175,7 +151,8 @@ enum {
 #define	BBREG4			(0x3C)
 #define	BBREG6			(0x3E)
 #define	CCAEDTH			(0x3F)
-/* Long address registers  */
+
+/* Direcciones de los registros de 16 bits -----------------------------------*/
 #define	RFCON0			(0x200)
 #define	RFCON1			(0x201)
 #define	RFCON2			(0x202)
@@ -223,7 +200,8 @@ enum {
 #define	UPNONCE10		(0x24A)
 #define	UPNONCE11		(0x24B)
 #define	UPNONCE12		(0x24C)
-/* Definitions for FIFOs in the memory */
+
+/* Direcciones de los registros de las FIFOs ---------------------------------*/
 #define	TX_NORMAL_FIFO	(0x000)
 #define	TX_BEACON_FIFO	(0x080)
 #define	TX_GTS1_FIFO	(0x100)
@@ -231,21 +209,7 @@ enum {
 #define	RX_FIFO			(0x300)
 #define	TX_SEC_KEY		(0x280)
 #define RX_SEC_KEY		(0x2B0)
-/* Configuraciones de la transmisión */
-#define	BROADCAST		(0xFFFF)
-#define SEG_HAB			(0X02)
-#define ESPERO_ACK		(0X04)
-#define	P30dBm			(0XC0)
-#define	P20dBm			(0X80)
-#define	P10dBm			(0X40)
-#define	P6_3dBm			(0X38)
-#define	P4_9dBm			(0X30)
-#define	P3_7dBm			(0X28)
-#define	P2_8dBm			(0X20)
-#define	P1_9dBm			(0X18)
-#define	P1_2dBm			(0X10)
-#define	P0_5dBm			(0X08)
-#define	P0dBm			(0X00)
+
 /* LSB */
 #define	DATA			(0X01)
 #define	ACK				(0X02)
@@ -254,6 +218,7 @@ enum {
 #define	FRAME_PEND		(0X10)
 #define	ACK_REQ			(0X20)
 #define	INTRA_PAN		(0X40)
+
 /* MSB */
 #define TX_CTR			(0x01)
 #define TX_CCM128		(0x02)
@@ -266,6 +231,175 @@ enum {
 #define	LONG_D_ADD		(0X0C)
 #define	SHORT_S_ADD		(0X80)
 #define	LONG_S_ADD		(0XC0)
+
+/* Definiciones del registro INTCON ------------------------------------------*/
+#define SLPIE_DIS		(0X80)
+#define WAKEIE_DIS		(0X40)
+#define HSYMTMRIE_DIS	(0X20)
+#define SECIE_DIS		(0X10)
+#define RXIE_DIS		(0X08)
+#define TXG2IE_DIS		(0X04)
+#define TXG1IE_DIS		(0X02)
+#define TXNIE_DIS		(0X01)
+
+/* Definiciones del registro SOFTRST -----------------------------------------*/
+#define RSTPWR			(0X04)
+#define RSTBB			(0X02)
+#define RSTMAC			(0X01)
+
+/* Definiciones del registro RXFLUSH -----------------------------------------*/
+#define WAKEPOL_HIGH	(0X40)
+#define WAKEPAD_EN		(0X20)
+#define CMDONLY			(0X08)
+#define DATAONLY		(0X04)
+#define BCNONLY			(0X02)
+#define RXFLUSH_RESET	(0X01)
+
+/* Definiciones del registro RFCON1 ------------------------------------------*/
+#define VCOOPT7			(0X80)
+#define VCOOPT6			(0X40)
+#define VCOOPT5			(0X20)
+#define VCOOPT4			(0X10)
+#define VCOOPT3			(0X08)
+#define VCOOPT2			(0X04)
+#define VCOOPT1			(0X02)
+#define VCOOPT0			(0X01)
+
+/* Definiciones del registro RFCON2 ------------------------------------------*/
+#define PLLEN			(0X80)
+
+/* Definiciones del registro RFCON3 ------------------------------------------*/
+#define	P30dBm			(0XC0)
+#define	P20dBm			(0X80)
+#define	P10dBm			(0X40)
+#define	P6_3dBm			(0X38)
+#define	P4_9dBm			(0X30)
+#define	P3_7dBm			(0X28)
+#define	P2_8dBm			(0X20)
+#define	P1_9dBm			(0X18)
+#define	P1_2dBm			(0X10)
+#define	P0_5dBm			(0X08)
+#define	P0dBm			(0X00)
+
+/* Definiciones del registro RFCON6 ------------------------------------------*/
+#define	TXFIL			(0X80)
+#define	_20MRECVR		(0X10)
+#define	BATEN			(0X08)
+
+/* Definiciones del registro RFCON7 ------------------------------------------*/
+#define	SLPCLK100KHZ	(0X80)
+#define	SLPCLK32KHZ		(0X40)
+
+/* Definiciones del registro RFCON8 ------------------------------------------*/
+#define	RFVCO			(0X10)
+
+/* Definiciones del registro RFCTL -------------------------------------------*/
+#define	WAKECNT8		(0X10)
+#define	WAKECNT7		(0X08)
+#define	RFRST_HOLD		(0X04)
+#define	RFTXMODE		(0X02)
+#define	RFRXMODE		(0X01)
+
+/* Definiciones del registro SLPCON1 -----------------------------------------*/
+#define	CLKOUTDIS		(0X20)
+#define	SLPCLKDIV4		(0X10)
+#define	SLPCLKDIV3		(0X08)
+#define	SLPCLKDIV2		(0X04)
+#define	SLPCLKDIV1		(0X02)
+#define	SLPCLKDIV0		(0X01)
+
+/* Definiciones del registro BBREG0 ------------------------------------------*/
+#define	TURBO			(0X01)
+
+/* Definiciones del registro BBREG2 ------------------------------------------*/
+#define	CCA_Mode_3		(0XC0)
+#define	CCA_Mode_1		(0X80)
+#define	CCA_Mode_2		(0X40)
+#define	CCACSTH3		(0X20)
+#define	CCACSTH2		(0X10)
+#define	CCACSTH1		(0X08)
+#define	CCACSTH0		(0X04)
+
+/* Definiciones del registro BBREG3 ------------------------------------------*/
+#define	IEEE_802_15_4	(0XD0)
+#define	TURBO_MODE		(0X30)
+#define	PREDETTH2		(0X08)
+#define	PREDETTH1		(0X04)
+#define	PREDETTH0		(0X02)
+
+/* Definiciones del registro BBREG4 ------------------------------------------*/
+#define	IEEE_250KBPS	(0X80)
+#define	TURBO_625KBPS	(0X40)
+#define	PRECNT2			(0X10)
+#define	PRECNT1			(0X08)
+#define	PRECNT0			(0X04)
+
+/* Definiciones del registro BBREG6 ------------------------------------------*/
+#define	RSSIMODE1		(0X80)
+#define	RSSIMODE2		(0X40)
+
+/* Definiciones del registro CCAEDTH -----------------------------------------*/
+#define	CCAEDTH7		(0X80)
+#define	CCAEDTH6		(0X40)
+#define	CCAEDTH5		(0X20)
+#define	CCAEDTH4		(0X10)
+#define	CCAEDTH3		(0X08)
+#define	CCAEDTH2		(0X04)
+#define	CCAEDTH1		(0X02)
+#define	CCAEDTH0		(0X01)
+
+/* Definiciones del registro PACON2 ------------------------------------------*/
+#define	FIFOEN			(0X80)
+#define	TXONTS3			(0X20)
+#define	TXONTS2			(0X10)
+#define	TXONTS1			(0X08)
+#define	TXONTS0			(0X04)
+#define	TXONT8			(0X02)
+#define	TXONT7			(0X01)
+
+/* Definiciones del registro TXSTBL ------------------------------------------*/
+#define	RFSTBL3			(0X80)
+#define	RFSTBL2			(0X40)
+#define	RFSTBL1			(0X20)
+#define	RFSTBL0			(0X10)
+#define	MSIFS3			(0X08)
+#define	MSIFS2			(0X04)
+#define	MSIFS1			(0X02)
+#define	MSIFS0			(0X01)
+
+/* Definiciones del registro RFSTATE -----------------------------------------*/
+#define	RTSEL2			(0XE0)
+#define	RTSEL1			(0XC0)
+#define	RX				(0XA0)
+#define	TX				(0X80)
+#define	CALVCO			(0X60)
+#define	SLEEP			(0X40)
+#define	CALFIL			(0X20)
+#define	RESET			(0X00)
+
+/* Definiciones del registro ACKTMOUT -----------------------------------------*/
+#define	DRPACK			(0X80)
+#define	MAWD6			(0X40)
+#define	MAWD5			(0X20)
+#define	MAWD4			(0X10)
+#define	MAWD3			(0X08)
+#define	MAWD2			(0X04)
+#define	MAWD1			(0X02)
+#define	MAWD0			(0X01)
+
+/* Definiciones del registro TXNCON -------------------------------------------*/
+#define FPSTAT			(0X10)
+#define INDIRECT		(0X08)
+#define TXNACKREQ		(0X04)
+#define TXNSECEN		(0X02)
+#define TXNTRIG			(0X01)
+
+
+
+
+
+
+
 
 /* Prototipo de funciones privadas -------------------------------------------*/
 static void InicializoVariables(void);
@@ -290,44 +424,37 @@ void MRF24J40Init(void) {
     delay_t(1);
     SetResetPin(1);
     delay_t(1);
-    SetShortAddr(SOFTRST,0x07);
+(void)GetShortAddr(VACIO);
+    SetShortAddr(SOFTRST, RSTPWR | RSTBB | RSTMAC);
 
     do {
         lectura = GetShortAddr(SOFTRST);
-    }while((lectura&0x07) != VACIO);
+    }while((lectura & (RSTPWR | RSTBB | RSTMAC)) != VACIO);
     delay_t(1);
-    SetShortAddr(RXFLUSH, 0x01);
+    SetShortAddr(RXFLUSH, RXFLUSH_RESET);
     SetDeviceAddress();
     SetDeviceMACAddress();
-    SetLongAddr(RFCON2, 0x80);
+    SetLongAddr(RFCON2, PLLEN);
     SetLongAddr(RFCON3, P30dBm | P6_3dBm);
-	SetLongAddr(RFCON6, 0x90);
-	SetLongAddr(RFCON7, 0x80);
-	SetLongAddr(RFCON8, 0x10);
-	SetLongAddr(SLPCON1, 0x21);
-    SetShortAddr(BBREG2, 0x80);
-    SetShortAddr(BBREG6, 0x40);
-    SetShortAddr(CCAEDTH, 0x60);
-    SetShortAddr(PACON2, 0x98);
-    SetShortAddr(TXSTBL, 0x95);
+	SetLongAddr(RFCON6, TXFIL | _20MRECVR);
+	SetLongAddr(RFCON7, SLPCLK100KHZ);
+	SetLongAddr(RFCON8, RFVCO);
+	SetLongAddr(SLPCON1, CLKOUTDIS | SLPCLKDIV0);
+    SetShortAddr(BBREG2, CCA_Mode_1);
+    SetShortAddr(BBREG6, RSSIMODE2);
+    SetShortAddr(CCAEDTH, CCAEDTH2 | CCAEDTH1);
+    SetShortAddr(PACON2, FIFOEN | TXONTS2 | TXONTS1);
+    SetShortAddr(TXSTBL, RFSTBL3 | RFSTBL0 | MSIFS2 | MSIFS0);
 
     do {
 		lectura = GetLongAddr(RFSTATE);
-	}while((lectura & 0xA0) != 0xA0);
-    SetShortAddr(MRFINTCON, 0xE6);
-	SetShortAddr(ACKTMOUT, 0xB9);
-    SetLongAddr(RFCON0, 0x03);
-	SetLongAddr(RFCON1, 0x02);
+	}while(lectura != RX);
+    SetShortAddr(MRFINTCON, SLPIE_DIS | WAKEIE_DIS | HSYMTMRIE_DIS | SECIE_DIS | TXG2IE_DIS | TXNIE_DIS);
+	SetShortAddr(ACKTMOUT, DRPACK | MAWD5 | MAWD4 | MAWD3 | MAWD0);
+ 	SetLongAddr(RFCON1, VCOOPT1 | VCOOPT0);
 	SetChannel();
-    /* TURBO_MODE si es necesario mayor ancho de banda, máximo 625 Kbps */
-#ifdef TURBO_MODE
-	SetShortAddr(BBREG0,0x01);
-	SetShortAddr(BBREG3,0x38);
-	SetShortAddr(BBREG4,0x5C);
-	SetShortAddr(RFCTL,0x04);
-	SetShortAddr(RFCTL,0x00);
-#endif
-	SetShortAddr(RXMCR,0x00);
+	SetShortAddr(RXMCR, VACIO);
+	(void)GetShortAddr(INTSTAT);		// Limpio las interrupciones.
 	return;
 }
 
@@ -365,7 +492,7 @@ static void InicializoVariables(void) {
  */
 static void SetShortAddr(uint8_t reg_address, uint8_t value) {
 
-    reg_address = (uint8_t) (reg_address << 1) | WRITE_8_BITS;
+    reg_address = (uint8_t) (reg_address << SHIFT_SHORT_ADDR) | WRITE_8_BITS;
     SetCSPin(false);
 	WriteByteSPIPort(reg_address);
 	WriteByteSPIPort(value);
@@ -381,7 +508,7 @@ static void SetShortAddr(uint8_t reg_address, uint8_t value) {
 static uint8_t GetShortAddr(uint8_t reg_address) {
 
    	uint8_t leido_spi = VACIO;
-    reg_address = (uint8_t) (reg_address << 1) & READ_8_BITS;
+    reg_address = (uint8_t) (reg_address << SHIFT_SHORT_ADDR) & READ_8_BITS;
     SetCSPin(false);
     WriteByteSPIPort(reg_address);
     leido_spi = ReadByteSPIPort();
@@ -396,7 +523,7 @@ static uint8_t GetShortAddr(uint8_t reg_address) {
  */
 static void SetLongAddr(uint16_t reg_address, uint8_t value) {
 
-    reg_address = (reg_address << 5) | WRITE_16_BITS;
+    reg_address = (reg_address << SHIFT_LONG_ADDR) | WRITE_16_BITS;
     SetCSPin(false);
     Write2ByteSPIPort(reg_address);
 	WriteByteSPIPort(value);
@@ -412,7 +539,7 @@ static void SetLongAddr(uint16_t reg_address, uint8_t value) {
 static uint8_t GetLongAddr(uint16_t reg_address) {
 
 	uint8_t respuesta;
-    reg_address = (reg_address << 5) | READ_16_BITS;
+    reg_address = (reg_address << SHIFT_LONG_ADDR) | READ_16_BITS;
     SetCSPin(false);
     Write2ByteSPIPort(reg_address);
 	respuesta = ReadByteSPIPort();
@@ -428,8 +555,8 @@ static uint8_t GetLongAddr(uint16_t reg_address) {
 static void SetChannel(void) {
 
 	SetLongAddr(RFCON0, mrf24_data_config.my_channel);
-	SetShortAddr(RFCTL, 0x04);
-	SetShortAddr(RFCTL, 0x00);
+	SetShortAddr(RFCTL, RFRST_HOLD);
+	SetShortAddr(RFCTL, VACIO);
 	delay_t(1);
 	return;
 }
@@ -441,9 +568,9 @@ static void SetChannel(void) {
  */
 static void SetDeviceAddress(void) {
 
-	SetShortAddr(SADRH, (uint8_t) (mrf24_data_config.my_address >> 8));
+	SetShortAddr(SADRH, (uint8_t) (mrf24_data_config.my_address >> SHIFT_BYTE));
 	SetShortAddr(SADRL, (uint8_t) (mrf24_data_config.my_address));
-	SetShortAddr(PANIDH, (uint8_t) (mrf24_data_config.my_panid >> 8));
+	SetShortAddr(PANIDH, (uint8_t) (mrf24_data_config.my_panid >> SHIFT_BYTE));
 	SetShortAddr(PANIDL, (uint8_t) (mrf24_data_config.my_panid));
 	return;
 }
@@ -455,11 +582,11 @@ static void SetDeviceAddress(void) {
  */
 static void SetDeviceMACAddress(void) {
 
-    my_default_mac_address = EADR0;
+    long_mac_address = EADR0;
 
     for(int i = 0; i < 8; i++) {
 
-        SetShortAddr(my_default_mac_address++, mrf24_data_config.my_mac[i]);
+        SetShortAddr(long_mac_address++, mrf24_data_config.my_mac[i]);
     }
 	return;
 }
@@ -514,19 +641,28 @@ void EnviarDato(void) {
 	SetLongAddr(pos_memoria++, DATA|ACK_REQ|INTRA_PAN);         // LSB.
 	SetLongAddr(pos_memoria++, LONG_S_ADD|SHORT_D_ADD);         // MSB.
 	SetLongAddr(pos_memoria++, mrf24_data_config.sequence_number++);
+	SetLongAddr(pos_memoria++, (uint8_t) (mrf24_data_out.destinity_panid >> SHIFT_BYTE));
 	SetLongAddr(pos_memoria++, (uint8_t) mrf24_data_out.destinity_panid);
-	SetLongAddr(pos_memoria++, (uint8_t) (mrf24_data_out.destinity_panid >> 8));
+	SetLongAddr(pos_memoria++, (uint8_t) (mrf24_data_out.destinity_address >> SHIFT_BYTE));
 	SetLongAddr(pos_memoria++, (uint8_t) mrf24_data_out.destinity_address);
-	SetLongAddr(pos_memoria++, (uint8_t) (mrf24_data_out.destinity_address >> 8));
 
     for(int8_t i = 0; i < mrf24_data_out.largo_mensaje; i++) {
 
 		SetLongAddr(pos_memoria++, mrf24_data_out.buffer_salida[i]);
 	}
-	SetShortAddr(TXNCON, 1 | ESPERO_ACK);               // Realizo el envio.
+	SetShortAddr(TXNCON, TXNACKREQ | TXNTRIG);
 	return;
 }
 
+/**
+ * @brief  Consulto si se levantó la bandera indicando la llegada de un mensaje.
+ * @param  None
+ * @retval Booleano indicando si hay un mensaje.
+ */
+bool_t MRF24IsNewMsg(void) {
+
+	return !IsMRF24Interrup();
+}
 
 
 
@@ -561,7 +697,7 @@ void EnviarDatoEncriptado(void) {
 	SetLongAddr(pos_memoria++, LONG_S_ADD | SHORT_D_ADD);               // MSB.
 	SetLongAddr(pos_memoria++, mrf24_data_config.sequence_number++);
 	SetLongAddr(pos_memoria++, (uint8_t) (mrf24_data_out.destinity_panid));
-	SetLongAddr(pos_memoria++, (uint8_t) (mrf24_data_out.destinity_panid >> 8));
+	SetLongAddr(pos_memoria++, (uint8_t) (mrf24_data_out.destinity_panid >> SHIFT_BYTE));
 
 	SetLongAddr(pos_memoria++, 0x01);
 	SetLongAddr(pos_memoria++, 0x00);
@@ -579,7 +715,7 @@ void EnviarDatoEncriptado(void) {
 
 		SetLongAddr(pos_memoria++, *mrf24_data_out.buffer_salida++);
 	}
-	SetShortAddr(TXNCON, 0x07);			// Realizo el envio.
+	SetShortAddr(TXNCON, TXNACKREQ | TXNSECEN | TXNTRIG);
 	return;
 }
 
@@ -607,9 +743,9 @@ void EnviarComando(void) {
 	SetLongAddr(pos++, 0xc8);			// MSB.
 	SetLongAddr(pos++, mrf24_data_config.sequence_number++);
 	SetLongAddr(pos++, (uint8_t) mrf24_data_out.destinity_panid);
-	SetLongAddr(pos++, (uint8_t) (mrf24_data_out.destinity_panid >> 8));
+	SetLongAddr(pos++, (uint8_t) (mrf24_data_out.destinity_panid >> SHIFT_BYTE));
 	SetLongAddr(pos++, (uint8_t) mrf24_data_out.destinity_address);
-	SetLongAddr(pos++, (uint8_t) (mrf24_data_out.destinity_address >> 8));
+	SetLongAddr(pos++, (uint8_t) (mrf24_data_out.destinity_address >> SHIFT_BYTE));
 	for(i = 0; i < 8; i++)					// MAC address de origen.
 	{
 		SetLongAddr(pos++, mrf24_data_config.my_mac[i]);
@@ -618,8 +754,8 @@ void EnviarComando(void) {
 	SetLongAddr(pos++, 0x18);
 	SetLongAddr(pos++, 0x09);
 	SetLongAddr(pos++, 0x01);
-//	SetShortAddr(TXNCON, SEG_HAB|1);		// Realizo el envio.
-	SetShortAddr(TXNCON, 1 | ESPERO_ACK);	// Realizo el envio.
+//	SetShortAddr(TXNCON, TXNSECEN | TXNTRIG);
+	SetShortAddr(TXNCON, TXNACKREQ | TXNTRIG);
 	return;
 }
 
@@ -631,14 +767,14 @@ void EnviarComando(void) {
 void ReciboPaquete(void) {//////////////////////////////////////////////////////////// para que obtengo el rssi?
 
 	uint8_t i;
-	uint8_t rssi,final;
-	final = GetLongAddr(RX_FIFO);		// Obtengo la longitud del mensaje.
+	uint8_t final;
+	final = GetLongAddr(RX_FIFO);				// Obtengo la longitud del mensaje.
 	for(i = 0; i < final - 17; i++)
 	{
 		mrf24_data_in.buffer_entrada[i] = GetLongAddr(RX_FIFO + i + 16);
 	}
-	mrf24_data_in.buffer_entrada[i] = 0;    // Marco el final de la cadena.
-	rssi = GetLongAddr(RSSI);		// Calidad de la señal.
+	mrf24_data_in.buffer_entrada[i] = 0;    	// Marco el final de la cadena.
+	mrf24_data_in.rssi = GetLongAddr(RSSI);		// Calidad de la señal.
 	return;
 }
 

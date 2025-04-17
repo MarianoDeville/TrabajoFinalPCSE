@@ -1,10 +1,13 @@
-/*
- * API_MRF24J40_port.h
+/**
+ *******************************************************************************
+ * @file    API_MRF24J40_port.h
+ * @author  Lcdo. Mariano Ariel Deville
+ * @brief	Archivo cabecera para el archivo API_MRF24J40_port.c
+ *******************************************************************************
+ * @attention Este archivo asegura la portabilidad del driver (API_MRF24J40.c)
  *
- *  Created on: Apr 9, 2025
-  *      Author: Mariano Deville
+ *******************************************************************************
  */
-
 #ifndef INC_API_MRF24J40_PORT_H_
 #define INC_API_MRF24J40_PORT_H_
 

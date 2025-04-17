@@ -1,10 +1,10 @@
 /**
  *******************************************************************************
- * @file    DriverMRF24J40.X/drivers/src/drv_mrf24j40port.c
+ * @file    API_MRF24J40_port.c
  * @author  Lcdo. Mariano Ariel Deville
  * @brief   Implementación driver módulo MRF24J40MA
  *******************************************************************************
- * @attention Este archivo asegura la portabilidad del driver (drv_mrf24j40.c)
+ * @attention Este archivo asegura la portabilidad del driver (API_MRF24J40.c)
  *
  *******************************************************************************
  */
@@ -91,7 +91,11 @@ void WriteByteSPIPort(uint8_t dato){
  */
 void Write2ByteSPIPort(uint16_t dato){
 
-	HAL_SPI_Transmit(&hspi3, &dato, _2_BYTES, TIME_OUT_SPI);
+//	HAL_SPI_Transmit(&hspi3, &dato, _2_BYTES, TIME_OUT_SPI);
+	uint8_t dato_partido = (uint8_t) (dato >> 8);
+	HAL_SPI_Transmit(&hspi3, &dato_partido, _1_BYTE, TIME_OUT_SPI);
+	dato_partido = (uint8_t) dato;
+	HAL_SPI_Transmit(&hspi3, &dato_partido, _1_BYTE, TIME_OUT_SPI);
     return;
 }
 

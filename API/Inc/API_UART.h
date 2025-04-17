@@ -40,7 +40,7 @@ bool_t UARTtInit(puerto_UART * data_port, UART_HandleTypeDef * huart);
 Estado_TX_RX UARTSendString(puerto_UART * data_port, const uint8_t * pstring);
 Estado_TX_RX UARTSendStringSize(puerto_UART * data_port, const uint8_t * pstring, uint16_t size);
 void UARTReceiveStringSize(puerto_UART * data_port, uint16_t size);
-bool_t IsNewMessage(puerto_UART * data_port);
+bool_t UARTIsNewMessage(puerto_UART * data_port);
 bool_t PutConfiguration(puerto_UART * data_port);
 
 #endif /* API_INC_API_UART_H_ */

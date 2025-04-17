@@ -109,7 +109,7 @@ int main(void)
   MX_SPI3_Init();
 
   /* USER CODE BEGIN 2 */
-  DelayInit(&delay_parpadeo, 250);
+  DelayInit(&delay_parpadeo, 1000);
   if(!UARTtInit(&puerto_UART1, &huart5))
   	  Error_Handler();
   LCDInint();
@@ -121,7 +121,12 @@ int main(void)
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
 
+	SetMensajeSalida("Hola mundo.");
+	SetDireccionDestino(BROADCAST);
+	SetPANIDDestino(0X1234);
 
+	LCDClear();
+	//LCDWriteString("Hola mundo");
 
 
 	while (1) {
@@ -129,23 +134,26 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
 
+		if(MRF24IsNewMsg()) {
 
-		if(IsNewMessage(&puerto_UART1)) {
+			LCDWriteCaracter(48);
+		}
 
-			LCDWRITECARACTER(&puerto_UART1.rx_buff[0]);
+		if(UARTIsNewMessage(&puerto_UART1)) {
+
 			UARTSendString(&puerto_UART1, puerto_UART1.rx_buff);
-
 
 			if(puerto_UART1.rx_buff[0] == 'c') {
 
-				LCDClear();
 				PutConfiguration(&puerto_UART1);
 			}
 			memset(puerto_UART1.rx_buff, 0, sizeof(puerto_UART1.rx_buff));/////////////////////////////////////////////////////////////////////////////////////
 		}
 
-		if(DelayRead(&delay_parpadeo))
+		if(DelayRead(&delay_parpadeo)) {
+	        EnviarDato();
 			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		}
 	}
   /* USER CODE END 3 */
 }
