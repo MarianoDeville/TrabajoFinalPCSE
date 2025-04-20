@@ -1,9 +1,14 @@
-/*
- * API_debounce.c
+/**
+******************************************************************************
+ * @file    API_debounce.c
+ * @author  Lcdo. Mariano Ariel Deville
+ * @brief   Implementación driver antirrebote con delay no bloqueante.
+ *******************************************************************************
+ * @attention
  *
- *  Created on: Mar 28, 2025
- *      Author: Mariano Deville
+ *******************************************************************************
  */
+
 #include "API_debounce.h"
 
 /**
@@ -16,7 +21,7 @@
   * @param  Puntero a la estructura que contiene las variabes.
   * @retval None
   */
-void debounceFSM_init(debounceData_t * antirrebote_boton_n) {
+void DebounceFSMInit(debounceData_t * antirrebote_boton_n) {
 
 	assert_param(antirrebote_boton_n);
 	antirrebote_boton_n->estadoActual = BUTTON_UP;
@@ -32,7 +37,7 @@ void debounceFSM_init(debounceData_t * antirrebote_boton_n) {
   * @note	En el enunciado la función no posee parámetros, pero de esta forma independizo totalmente
   * 		el driver del hardware en donde lo implemento.
   */
-estadoPulsador_t debounceFSM_update(debounceData_t * antirrebote_boton_n, bool_t estado_pin) {
+estadoPulsador_t DebounceFSMUpdate(debounceData_t * antirrebote_boton_n, bool_t estado_pin) {
 
 	assert_param(antirrebote_boton_n);
 	switch(antirrebote_boton_n->estadoActual) {
@@ -83,7 +88,7 @@ estadoPulsador_t debounceFSM_update(debounceData_t * antirrebote_boton_n, bool_t
 
 		default:
 
-			debounceFSM_init(antirrebote_boton_n);
+			DebounceFSMInit(antirrebote_boton_n);
 			return ERROR_ANTI_REBOTE;
 	}
 	return BOTON_SIN_CAMBIOS;

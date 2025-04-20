@@ -1,9 +1,14 @@
-/*
- * API_uart.c
+/**
+******************************************************************************
+ * @file    API_UART.c
+ * @author  Lcdo. Mariano Ariel Deville
+ * @brief   Implementación driver puerto UART con interrupciones
+ *******************************************************************************
+ * @attention
  *
- *  Created on: Apr 3, 2025
- *      Author: Mariano Deville
+ *******************************************************************************
  */
+
 #include "API_UART.h"
 #include "string.h"
 

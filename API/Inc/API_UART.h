@@ -1,8 +1,13 @@
-/*
- * API_uart.h
+/**
+******************************************************************************
+ * @file    API_UART.h
+ * @author  Lcdo. Mariano Ariel Deville
+ * @brief   Archivo cabecera para la implementación driver puerto UART con
+ * 			interrupciones
+ *******************************************************************************
+ * @attention
  *
- *  Created on: Apr 3, 2025
- *      Author: Mariano Deville
+ *******************************************************************************
  */
 
 #ifndef API_INC_API_UART_H_

@@ -10,11 +10,12 @@
 
 #include "stdbool.h"
 #include "main.h"
+
 /**
  * Macros
  */
+#define VACIO           (0X00)
 #define  delay_t(x) HAL_Delay(x)
-
 
 /**
  * Respuestas de las funciones de envío de datos.

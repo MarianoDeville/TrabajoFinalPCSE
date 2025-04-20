@@ -16,6 +16,9 @@
 //#include "drv_mspi_port.h"
 //#include "../../redef_var.h"
 
+#define _1_BYTE			(0x01)
+#define _2_BYTES		(0x02)
+#define TIME_OUT_SPI	100
 
 
 /* Prototipo de funciones públicas -------------------------------------------*/

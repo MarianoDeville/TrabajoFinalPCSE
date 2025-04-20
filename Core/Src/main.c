@@ -15,47 +15,29 @@
   *
   ******************************************************************************
   */
-/* USER CODE END Header */
+
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
-
-/* Private includes ----------------------------------------------------------*/
-/* USER CODE BEGIN Includes */
 #include "string.h"
 #include "compatibility.h"
 #include "API_delay.h"
 #include "API_LCD.h"
 #include "API_UART.h"
 #include "API_MRF24J40.h"
-
-/* USER CODE END Includes */
-
-/* Private typedef -----------------------------------------------------------*/
-/* USER CODE BEGIN PTD */
-
-/* USER CODE END PTD */
+#include "API_MRF24J40_port.h"
+#include "API_debounce.h"
 
 /* Private define ------------------------------------------------------------*/
-/* USER CODE BEGIN PD */
 #define	RX_MSG_SIZE		1
-
-/* USER CODE END PD */
-
-/* Private macro -------------------------------------------------------------*/
-/* USER CODE BEGIN PM */
-
-/* USER CODE END PM */
+#define INDEX_CERO		0
+#define RETORNO_CARRO	'\r'
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c3;
 SPI_HandleTypeDef hspi3;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart5;
-
-/* USER CODE BEGIN PV */
 puerto_UART puerto_UART1;
-
-/* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
@@ -64,98 +46,94 @@ static void MX_USART2_UART_Init(void);
 static void MX_I2C3_Init(void);
 static void MX_SPI3_Init(void);
 
-/* USER CODE BEGIN PFP */
-
-/* USER CODE END PFP */
-
-/* Private user code ---------------------------------------------------------*/
-/* USER CODE BEGIN 0 */
-
-/* USER CODE END 0 */
-
 /**
   * @brief  The application entry point.
   * @retval int
   */
-int main(void)
-{
+int main(void) {
 
-  /* USER CODE BEGIN 1 */
+	uint8_t mensaje[20];
+	HAL_Init();
+	SystemClock_Config();
+	MX_GPIO_Init();
+	MX_USART2_UART_Init();
+	MX_I2C3_Init();
+	MX_SPI3_Init();
 
-  /* USER CODE END 1 */
+	if(!UARTtInit(&puerto_UART1, &huart5))
+		Error_Handler();
+	LCDInint();
+	if(MRF24J40Init() == TIME_OUT_OCURRIDO)
+		Error_Handler();
+	UARTReceiveStringSize(&puerto_UART1, RX_MSG_SIZE);
+	debounceData_t boton1;
+	DebounceFSMInit(&boton1);
 
-  /* MCU Configuration--------------------------------------------------------*/
-
-  /* Reset of all peripherals, Initializes the Flash interface and the Systick. */
-  HAL_Init();
-
-  /* USER CODE BEGIN Init */
-  delay_no_bloqueante delay_parpadeo;
-
-
-  /* USER CODE END Init */
-
-  /* Configure the system clock */
-  SystemClock_Config();
-
-  /* USER CODE BEGIN SysInit */
-
-  /* USER CODE END SysInit */
-
-  /* Initialize all configured peripherals */
-  MX_GPIO_Init();
-  MX_USART2_UART_Init();
-  MX_I2C3_Init();
-  MX_SPI3_Init();
-
-  /* USER CODE BEGIN 2 */
-  DelayInit(&delay_parpadeo, 1000);
-  if(!UARTtInit(&puerto_UART1, &huart5))
-  	  Error_Handler();
-  LCDInint();
-  MRF24J40Init();
-  UARTReceiveStringSize(&puerto_UART1, RX_MSG_SIZE);
-
-  /* USER CODE END 2 */
-
-  /* Infinite loop */
-  /* USER CODE BEGIN WHILE */
-
-	SetMensajeSalida("Hola mundo.");
-	SetDireccionDestino(BROADCAST);
-	SetPANIDDestino(0X1234);
-
-	LCDClear();
-	//LCDWriteString("Hola mundo");
-
-
-	while (1) {
-    /* USER CODE END WHILE */
-
-    /* USER CODE BEGIN 3 */
+	while(1) {
 
 		if(MRF24IsNewMsg()) {
 
-			LCDWriteCaracter(48);
+			MRF24ReciboPaquete();
+			LCDClear();
+			LCDWriteString((char *)MRF24GetMensajeEntrada());
+			UARTSendString(&puerto_UART1, MRF24GetMensajeEntrada());
+			UARTSendString(&puerto_UART1, (const uint8_t *)CRLF);
+
+			if(!strcmp((char *)MRF24GetMensajeEntrada(),"CMD:PLV"))
+				HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, ENCENDIDO);
+
+			else if(!strcmp((char *)MRF24GetMensajeEntrada(),"CMD:ALV"))
+				HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, APAGADO);
 		}
 
 		if(UARTIsNewMessage(&puerto_UART1)) {
 
-			UARTSendString(&puerto_UART1, puerto_UART1.rx_buff);
+			if(puerto_UART1.rx_buff[INDEX_CERO] == RETORNO_CARRO) {
 
-			if(puerto_UART1.rx_buff[0] == 'c') {
+				UARTSendString(&puerto_UART1, (const uint8_t *)CRLF);
+				MRF24SetMensajeSalida((const char *)mensaje);
+				MRF24TransmitirDato();
+				memset(mensaje, VACIO, sizeof(mensaje));
+			} else {
 
-				PutConfiguration(&puerto_UART1);
+				strcat((char *) mensaje, (const char *) puerto_UART1.rx_buff);
+				UARTSendString(&puerto_UART1, puerto_UART1.rx_buff);
 			}
-			memset(puerto_UART1.rx_buff, 0, sizeof(puerto_UART1.rx_buff));/////////////////////////////////////////////////////////////////////////////////////
 		}
 
-		if(DelayRead(&delay_parpadeo)) {
-	        EnviarDato();
-			HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		switch(DebounceFSMUpdate(&boton1, HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin))) {
+
+			case PRESIONO_BOTON:
+
+				MRF24SetMensajeSalida("CMD:PLA");
+				MRF24TransmitirDato();
+				break;
+
+			case SUELTO_BOTON:
+
+				MRF24SetMensajeSalida("CMD:ALA");
+				MRF24TransmitirDato();
+				break;
+
+			case RUIDO:
+
+				UARTSendString(&puerto_UART1,  (const uint8_t *) "Ruido detectado en el pulsador." CRLF);
+				break;
+
+			case ERROR_ANTI_REBOTE:
+
+				UARTSendString(&puerto_UART1, (const uint8_t *) "Error al procesar el antirrebote." CRLF);
+				break;
+
+			case BOTON_SIN_CAMBIOS:
+
+				break;
+
+			default:
+
+				UARTSendString(&puerto_UART1, (const uint8_t *) "Error inesperado." CRLF);
 		}
 	}
-  /* USER CODE END 3 */
 }
 
 /**
@@ -221,7 +199,7 @@ static void MX_I2C3_Init(void)
 
   /* USER CODE END I2C3_Init 1 */
   hi2c3.Instance = I2C3;
-  hi2c3.Init.ClockSpeed = 100000;
+  hi2c3.Init.ClockSpeed = 80000;
   hi2c3.Init.DutyCycle = I2C_DUTYCYCLE_2;
   hi2c3.Init.OwnAddress1 = 0;
   hi2c3.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
@@ -373,6 +351,7 @@ void Error_Handler(void)
   __disable_irq();
   while (1)
   {
+	  HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, 1);
   }
   /* USER CODE END Error_Handler_Debug */
 }

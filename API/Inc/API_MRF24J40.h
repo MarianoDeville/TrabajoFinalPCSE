@@ -2,22 +2,23 @@
  *******************************************************************************
  * @file    API_MRF24J40.h
  * @author  Lcdo. Mariano Ariel Deville
- * @brief	Archivo cabecera para el archivo API_MRF24J40_port.c
+ * @brief	Archivo cabecera para el archivo API_MRF24J40.c
  *******************************************************************************
- * @attention Este archivo asegura la portabilidad del driver (API_MRF24J40.c)
+ * @attention Driver independiente de la plataforma de uso y del compilardor.
+ *            Escrito en C.
  *
  *******************************************************************************
  */
 #ifndef INC_API_MRF24J40_H_
 #define INC_API_MRF24J40_H_
 
-/* Includes ------------------------------------------------------------------*/
-#include "main.h"
-//#include "../../redef_var.h"
-
+/* Macros --------------------------------------------------------------------*/
 #define	BROADCAST		(0xFFFF)
+#define MRF_TIME_OUT	100
+#define ENABLE			true
+#define	DISABLE			false
 
-/* Canales disponibles para el IEEE 802.15.4 */
+/* Canales disponibles para el IEEE 802.15.4 ---------------------------------*/
 typedef enum {
 
     CH_11 = 0x03,
@@ -36,22 +37,27 @@ typedef enum {
 	CH_24 = 0xD3,
 	CH_25 = 0xE3,
 	CH_26 = 0xF3
-}channel_list;
+} channel_list;
+
+/* Respuesta de las funciones ------------------------------------------------*/
+typedef enum {
+
+	TRANSMISION_REALIZADA,
+	TIME_OUT_OCURRIDO,
+	OPERACION_NO_REALIZADA,
+	OPERACION_REALIZADA
+} MRF24_StateTypeDef;
 
 /* Prototipo de funciones públicas -------------------------------------------*/
-void MRF24J40Init(void);
-void SetMensajeSalida(const char * mensaje);
-void SetDireccionDestino(uint16_t direccion);
-void SetPANIDDestino(uint16_t panid);
-void EnviarDato(void);
+MRF24_StateTypeDef MRF24J40Init(void);
+void MRF24SetMensajeSalida(const char * mensaje);
+void MRF24SetDireccionDestino(uint16_t direccion);
+void MRF24SetPANIDDestino(uint16_t panid);
+void MRF24TransmitirDato(void);
 bool_t MRF24IsNewMsg(void);
-
-
-
-void EnviarComando();
-void EnviarDatoEncriptado(void);
-void ReciboPaquete(void);
-void BuscarDispositivos(void);
+void MRF24ReciboPaquete(void);
+uint8_t * MRF24GetMensajeEntrada(void);
+void MRF24BuscarDispositivos(void);
 
 
 #endif /* INC_API_MRF24J40_H_ */

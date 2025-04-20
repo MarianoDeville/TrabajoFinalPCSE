@@ -13,10 +13,6 @@
 #include "API_MRF24J40_port.h"
 #include "main.h"
 
-#define _1_BYTE			0x01
-#define _2_BYTES		0x02
-#define TIME_OUT_SPI	100
-
 extern SPI_HandleTypeDef hspi3;
 /**
  * @brief  Inicialización del hardware relacionado con el módulo
@@ -91,7 +87,6 @@ void WriteByteSPIPort(uint8_t dato){
  */
 void Write2ByteSPIPort(uint16_t dato){
 
-//	HAL_SPI_Transmit(&hspi3, &dato, _2_BYTES, TIME_OUT_SPI);
 	uint8_t dato_partido = (uint8_t) (dato >> 8);
 	HAL_SPI_Transmit(&hspi3, &dato_partido, _1_BYTE, TIME_OUT_SPI);
 	dato_partido = (uint8_t) dato;

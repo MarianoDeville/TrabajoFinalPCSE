@@ -1,10 +1,14 @@
-/*
- * API_LCD.h
+/**
+******************************************************************************
+ * @file    API_LCD.h
+ * @author  Lcdo. Mariano Ariel Deville
+ * @brief   Archivo cabecera para la implementación driver display con
+ * 			comunicacion I2C
+ *******************************************************************************
+ * @attention
  *
- *  Created on: Apr 1, 2025
- *      Author: Mariano Deville
+ *******************************************************************************
  */
-
 #ifndef API_INC_API_LCD_H_
 #define API_INC_API_LCD_H_
 
@@ -15,6 +19,10 @@
 
 
 void LCDInint(void);
-void LCDWriteCaracter(uint8_t * caracter);
+void LCDWriteCaracter(char caracter);
+void LCDWriteString(char * cadena);
 void LCDClear(void);
+
+
+
 #endif /* API_INC_API_LCD_H_ */

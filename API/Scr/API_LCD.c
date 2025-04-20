@@ -1,8 +1,12 @@
-/*
- * API_LCD.c
+/**
+******************************************************************************
+ * @file    API_LCD.c
+ * @author  Lcdo. Mariano Ariel Deville
+ * @brief   Implementación driver display con comunicacion I2C
+ *******************************************************************************
+ * @attention
  *
- *  Created on: Apr 1, 2025
- *      Author: Mariano Deville
+ *******************************************************************************
  */
 
 #include "API_LCD.h"
@@ -37,8 +41,8 @@
 #define HIGH_NIBBLE			0XF0
 #define LOW_NIBBLE			4
 
-static void LCDWrite4Bits(uint8_t dato, uint8_t rs);
-static void LCDWrite8Bits(uint8_t dato, uint8_t rs);
+static void LCDWrite4Bits(char dato, uint8_t rs);
+static void LCDWrite8Bits(char dato, uint8_t rs);
 
 /**
   * @brief  Inicialización del display
@@ -56,7 +60,6 @@ void LCDInint(void) {
 	LCDWrite8Bits(ENTRY_SET_MODE | INCREASE, COMANDO);
 	LCDWrite8Bits(SET_FUNCTION | _2_LINE_DISPLAY, COMANDO);
 	LCDClear();
-	DelayLCD(5);
 	return;
 }
 
@@ -65,9 +68,9 @@ void LCDInint(void) {
   * @param  Puntero al caracter que voy a escribir.
   * @retval None.
   */
-void LCDWriteCaracter(uint8_t * caracter) {
+void LCDWriteCaracter(char caracter) {
 
-	LCDWrite8Bits(*caracter, INFORMACION);
+	LCDWrite8Bits(caracter, INFORMACION);
 }
 
 /**
@@ -75,16 +78,14 @@ void LCDWriteCaracter(uint8_t * caracter) {
   * @param  Puntero al caracter que voy a escribir.
   * @retval None.
   */
-void LCDWriteString(uint8_t * cadena) {
+void LCDWriteString(char * cadena) {
 
-	while(*cadena) {
+	while(*cadena){
 
-		LCDWriteCaracter(cadena++);
+		LCDWriteCaracter(*cadena++);
 	}
 	return;
 }
-
-
 
 /**
   * @brief  Limpio la pantalla del display.
@@ -93,6 +94,7 @@ void LCDWriteString(uint8_t * cadena) {
 void LCDClear(void) {
 
 	LCDWrite8Bits(CLEAR_DISPALY, COMANDO);
+	DelayLCD(2);
 }
 
 
@@ -105,14 +107,14 @@ void LCDClear(void) {
  */
 
 
-static void LCDWrite4Bits(uint8_t dato, uint8_t rs) {
+static void LCDWrite4Bits(char dato, uint8_t rs) {
 
 	LCDWritePort(dato | rs | ENABLE | BACK_LIGTH);
 	LCDWritePort(dato | rs | BACK_LIGTH);
 	return;
 }
 
-static void LCDWrite8Bits(uint8_t dato, uint8_t rs) {
+static void LCDWrite8Bits(char dato, uint8_t rs) {
 
 	LCDWrite4Bits(dato & HIGH_NIBBLE, rs);
 	LCDWrite4Bits(dato << LOW_NIBBLE, rs);

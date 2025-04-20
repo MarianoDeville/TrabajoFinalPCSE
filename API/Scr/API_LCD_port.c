@@ -1,8 +1,12 @@
-/*
- * API_LCD_port.c
+/**
+ *******************************************************************************
+ * @file    API_LCD_port.c
+ * @author  Lcdo. Mariano Ariel Deville
+ * @brief   Implementación driver módulo API_LCD
+ *******************************************************************************
+ * @attention Este archivo asegura la portabilidad del driver (API_LCD.c)
  *
- *  Created on: Apr 1, 2025
- *      Author: mariano
+ *******************************************************************************
  */
 
 #include "API_LCD_port.h"
