@@ -42,8 +42,8 @@ typedef struct {
  * Prototipo de funciones públicas.
  */
 bool_t UARTtInit(puerto_UART * data_port, UART_HandleTypeDef * huart);
-Estado_TX_RX UARTSendString(puerto_UART * data_port, const uint8_t * pstring);
-Estado_TX_RX UARTSendStringSize(puerto_UART * data_port, const uint8_t * pstring, uint16_t size);
+estado_TX_RX_t UARTSendString(puerto_UART * data_port, const uint8_t * pstring);
+estado_TX_RX_t UARTSendStringSize(puerto_UART * data_port, const uint8_t * pstring, uint16_t size);
 void UARTReceiveStringSize(puerto_UART * data_port, uint16_t size);
 bool_t UARTIsNewMessage(puerto_UART * data_port);
 bool_t PutConfiguration(puerto_UART * data_port);

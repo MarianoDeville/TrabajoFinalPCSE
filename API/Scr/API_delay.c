@@ -1,15 +1,17 @@
-/*
- * delay_no_bloqueante.c
+/**
+******************************************************************************
+ * @file    API_delay.c
+ * @author  Lcdo. Mariano Ariel Deville
+ * @brief   Implementación de delay no bloqueante.
+ *******************************************************************************
+ * @attention
  *
- *  Created on: Mar 20, 2025
- *      Author: Mariano Deville
+ *******************************************************************************
  */
+
 #include "API_delay.h"
 
-
-/**
- * Prototipo de funciones privadas.
- */
+/* Prototipo de funciones privadas -------------------------------------------*/
 static bool_t DelayIsRunning(delayNoBloqueanteData * delay);
 
 /**
@@ -32,7 +34,7 @@ void DelayInit(delayNoBloqueanteData * delay, tick_t duration) {
 
 /**
   * @brief  Obtengo el estado del delay.
-  * @param  Duración del delay.
+  * @param  Puntero a la estructura con las variables.
   * @retval Estado del delay (contando / tiempo cumplido).
   */
 bool_t DelayRead(delayNoBloqueanteData * delay) {
@@ -64,7 +66,7 @@ bool_t DelayRead(delayNoBloqueanteData * delay) {
   * @param  Duración del delay.
   * @retval None
   */
-void DelayWrite( delayNoBloqueanteData * delay, tick_t duration) {
+void DelayWrite(delayNoBloqueanteData * delay, tick_t duration) {
 
 	if(delay == NULL || duration == 0) {
 
@@ -76,7 +78,7 @@ void DelayWrite( delayNoBloqueanteData * delay, tick_t duration) {
 }
 
 /**
-  * @brief  Reseteo la cuenta del tiempo
+  * @brief  Reseteo la cuenta del tiempo.
   * @param  Puntero a la estructura con las variables.
   * @retval None
   */

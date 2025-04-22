@@ -2,7 +2,7 @@
 ******************************************************************************
  * @file    API_debounce.c
  * @author  Lcdo. Mariano Ariel Deville
- * @brief   Implementación driver antirrebote con delay no bloqueante.
+ * @brief   Implementación de antirrebote para pulsador con delay no bloqueante.
  *******************************************************************************
  * @attention
  *

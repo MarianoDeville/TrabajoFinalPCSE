@@ -2,7 +2,7 @@
 ******************************************************************************
  * @file    API_UART.c
  * @author  Lcdo. Mariano Ariel Deville
- * @brief   Implementación driver puerto UART con interrupciones
+ * @brief   Implementación driver puerto UART con interrupciones para la lectura
  *******************************************************************************
  * @attention
  *
@@ -50,7 +50,7 @@ bool_t UARTtInit(puerto_UART * data_port, UART_HandleTypeDef * huart) {
   * @param  Puntero a la cadena que se desea enviar.
   * @retval Devuelvo la información del resultado de la transmisión
   */
-Estado_TX_RX UARTSendString(puerto_UART * data_port, const uint8_t * pstring) {
+estado_TX_RX_t UARTSendString(puerto_UART * data_port, const uint8_t * pstring) {
 
 	if(pstring == NULL)
 		return BUFFER_VACIO;
@@ -66,7 +66,7 @@ Estado_TX_RX UARTSendString(puerto_UART * data_port, const uint8_t * pstring) {
   * @param  Tamaño de la cadena a enviar.
   * @retval Devuelvo la información del resultado de la transmisión.
   */
-Estado_TX_RX UARTSendStringSize(puerto_UART * data_port, const uint8_t * pstring, uint16_t size) {
+estado_TX_RX_t UARTSendStringSize(puerto_UART * data_port, const uint8_t * pstring, uint16_t size) {
 
 	if(pstring == NULL)
 			return BUFFER_VACIO;
@@ -84,7 +84,6 @@ Estado_TX_RX UARTSendStringSize(puerto_UART * data_port, const uint8_t * pstring
 /**
   * @brief  Recibo un mensaje entrante.
   * @param  Puntero a la estructura que contiene las variabes del puerto.
-  * @param  Puntero a la cadena que se usa como buffer de entrada.
   * @param  Tamaño de la cadena que se espera entre.
   * @retval None.
   */

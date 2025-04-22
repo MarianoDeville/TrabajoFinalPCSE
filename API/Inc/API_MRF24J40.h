@@ -57,7 +57,7 @@ void MRF24TransmitirDato(void);
 bool_t MRF24IsNewMsg(void);
 void MRF24ReciboPaquete(void);
 uint8_t * MRF24GetMensajeEntrada(void);
-void MRF24BuscarDispositivos(void);
+uint16_t MRF24GetMiPANID(void);
 
 
 #endif /* INC_API_MRF24J40_H_ */

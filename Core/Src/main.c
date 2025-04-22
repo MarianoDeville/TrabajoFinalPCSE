@@ -1,17 +1,10 @@
-/* USER CODE BEGIN Header */
 /**
   ******************************************************************************
   * @file           : main.c
+  * @author  		: Lcdo. Mariano Ariel Deville
   * @brief          : Main program body
   ******************************************************************************
   * @attention
-  *
-  * Copyright (c) 2025 STMicroelectronics.
-  * All rights reserved.
-  *
-  * This software is licensed under terms that can be found in the LICENSE file
-  * in the root directory of this software component.
-  * If no LICENSE file comes with this software, it is provided AS-IS.
   *
   ******************************************************************************
   */
@@ -28,8 +21,10 @@
 #include "API_debounce.h"
 
 /* Private define ------------------------------------------------------------*/
+#define LOW_END_ADDR	(0x1112)
 #define	RX_MSG_SIZE		1
 #define INDEX_CERO		0
+#define CADENA_SIZE		40
 #define RETORNO_CARRO	'\r'
 
 /* Private variables ---------------------------------------------------------*/
@@ -52,7 +47,7 @@ static void MX_SPI3_Init(void);
   */
 int main(void) {
 
-	uint8_t mensaje[20];
+	char mensaje[CADENA_SIZE];
 	HAL_Init();
 	SystemClock_Config();
 	MX_GPIO_Init();
@@ -60,21 +55,48 @@ int main(void) {
 	MX_I2C3_Init();
 	MX_SPI3_Init();
 
+	memset(mensaje, VACIO, sizeof(mensaje));
 	if(!UARTtInit(&puerto_UART1, &huart5))
 		Error_Handler();
 	LCDInint();
+
 	if(MRF24J40Init() == TIME_OUT_OCURRIDO)
 		Error_Handler();
 	UARTReceiveStringSize(&puerto_UART1, RX_MSG_SIZE);
 	debounceData_t boton1;
 	DebounceFSMInit(&boton1);
+	MRF24SetDireccionDestino(LOW_END_ADDR);
+	MRF24SetPANIDDestino(MRF24GetMiPANID());
+	LCDWrite2String("UART", "WIRELESS");
 
 	while(1) {
+
+		if(UARTIsNewMessage(&puerto_UART1)) {
+
+			if(puerto_UART1.rx_buff[INDEX_CERO] == RETORNO_CARRO) {
+
+				UARTSendString(&puerto_UART1, (const uint8_t *)CRLF);
+				MRF24SetMensajeSalida(mensaje);
+				MRF24TransmitirDato();
+				memset(mensaje, VACIO, sizeof(mensaje));
+				LCDClearLinea(COMIENZO_1_LINEA);
+			} else {
+
+				strcat(mensaje, (const char *) puerto_UART1.rx_buff);
+				UARTSendString(&puerto_UART1, puerto_UART1.rx_buff);
+
+				if(strlen(mensaje) == 1)
+					LCDClearLinea(COMIENZO_1_LINEA);
+				LCDGoto(COMIENZO_1_LINEA);
+				LCDWriteString(mensaje);
+			}
+		}
 
 		if(MRF24IsNewMsg()) {
 
 			MRF24ReciboPaquete();
-			LCDClear();
+			LCDClearLinea(COMIENZO_2_LINEA);
+			LCDGoto(COMIENZO_2_LINEA);
 			LCDWriteString((char *)MRF24GetMensajeEntrada());
 			UARTSendString(&puerto_UART1, MRF24GetMensajeEntrada());
 			UARTSendString(&puerto_UART1, (const uint8_t *)CRLF);
@@ -84,21 +106,6 @@ int main(void) {
 
 			else if(!strcmp((char *)MRF24GetMensajeEntrada(),"CMD:ALV"))
 				HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, APAGADO);
-		}
-
-		if(UARTIsNewMessage(&puerto_UART1)) {
-
-			if(puerto_UART1.rx_buff[INDEX_CERO] == RETORNO_CARRO) {
-
-				UARTSendString(&puerto_UART1, (const uint8_t *)CRLF);
-				MRF24SetMensajeSalida((const char *)mensaje);
-				MRF24TransmitirDato();
-				memset(mensaje, VACIO, sizeof(mensaje));
-			} else {
-
-				strcat((char *) mensaje, (const char *) puerto_UART1.rx_buff);
-				UARTSendString(&puerto_UART1, puerto_UART1.rx_buff);
-			}
 		}
 
 		switch(DebounceFSMUpdate(&boton1, HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin))) {

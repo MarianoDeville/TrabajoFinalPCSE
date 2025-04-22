@@ -27,7 +27,7 @@ typedef enum {
 	SIN_DATOS,
 	ERROR_SIZE,
 	ERROR_TRANSMISION,
-}Estado_TX_RX;
+}estado_TX_RX_t;
 
 
 #endif /* INC_COMPATIBILITY_H_ */

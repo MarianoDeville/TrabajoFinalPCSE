@@ -2,7 +2,7 @@
 ******************************************************************************
  * @file    API_LCD.c
  * @author  Lcdo. Mariano Ariel Deville
- * @brief   Implementación driver display con comunicacion I2C
+ * @brief   Implementación driver display.
  *******************************************************************************
  * @attention
  *
@@ -41,20 +41,27 @@
 #define HIGH_NIBBLE			0XF0
 #define LOW_NIBBLE			4
 
+#define _1_ms				1
+#define _2_ms				2
+#define _5_ms				5
+#define _15_ms				15
+
+/* Prototipo de funciones privadas -------------------------------------------*/
 static void LCDWrite4Bits(char dato, uint8_t rs);
 static void LCDWrite8Bits(char dato, uint8_t rs);
 
+/* Funciones públicas --------------------------------------------------------*/
 /**
   * @brief  Inicialización del display
   * @retval None
   */
 void LCDInint(void) {
 
-	DelayLCD(15);
+	DelayLCD(_15_ms);
 	LCDWrite4Bits(INICIALIZACION_1, COMANDO);
-	DelayLCD(5);
+	DelayLCD(_5_ms);
 	LCDWrite4Bits(INICIALIZACION_1, COMANDO);
-	DelayLCD(1);
+	DelayLCD(_1_ms);
 	LCDWrite4Bits(INICIALIZACION_2, COMANDO);
 	LCDWrite8Bits(DISPLAY_ON_OFF | DISPLAY_ON, COMANDO);
 	LCDWrite8Bits(ENTRY_SET_MODE | INCREASE, COMANDO);
@@ -65,7 +72,7 @@ void LCDInint(void) {
 
 /**
   * @brief  Escribo un caracter en el display.
-  * @param  Puntero al caracter que voy a escribir.
+  * @param  Caracter que voy a escribir.
   * @retval None.
   */
 void LCDWriteCaracter(char caracter) {
@@ -75,7 +82,7 @@ void LCDWriteCaracter(char caracter) {
 
 /**
   * @brief	Escribo una cadena en el display.
-  * @param  Puntero al caracter que voy a escribir.
+  * @param  Puntero a la cadenas que voy a escribir.
   * @retval None.
   */
 void LCDWriteString(char * cadena) {
@@ -94,19 +101,59 @@ void LCDWriteString(char * cadena) {
 void LCDClear(void) {
 
 	LCDWrite8Bits(CLEAR_DISPALY, COMANDO);
-	DelayLCD(2);
+	DelayLCD(_2_ms);
+	return;
 }
 
+/**
+  * @brief	Dejo el cursor en la posición indicada.
+  * @param  Cantidad de caracteres desplazados desde el inicio de la primer linea.
+  * @retval None.
+  */
+void LCDGoto(uint8_t pos) {
 
+	LCDWrite8Bits(SET_DD_RAM_ADDRESS + pos, COMANDO);
+	return;
+}
 
+/**
+  * @brief  Escribo dos cadenas de caracteres, una en cada linea.
+  * @param  Puntero a la primer cadena que voy a escribir.
+  * @param  Puntero a la segunda cadena que voy a escribir.
+  * @retval None.
+  */
+void LCDWrite2String(char *linea1, char *llinea2) {
 
+	LCDGoto(COMIENZO_1_LINEA);
+	LCDWriteString(linea1);
+	LCDGoto(COMIENZO_2_LINEA);
+	LCDWriteString(llinea2);
+	return;
+}
 
+/**
+  * @brief  Borro el contenido de una linea del display.
+  * @param  Cantidad de caracteres desplazados desde el inicio de la primer linea.
+  * @retval None.
+  */
+void LCDClearLinea(uint8_t pos) {
+
+	LCDGoto(pos);
+	for(uint8_t i = 0; i < 40; i++) {
+
+		LCDWriteCaracter(' ');
+	}
+}
 
 /** Funciones privadas
  *
  */
-
-
+/**
+  * @brief	Escribo 8 bits por el puerto destinado al display de 4 bits por vez.
+  * @param  Dato que escribo, 1 byte.
+  * @param  Indicador si es un comando lo que se escribe o información, 1 byte.
+  * @retval None.
+  */
 static void LCDWrite4Bits(char dato, uint8_t rs) {
 
 	LCDWritePort(dato | rs | ENABLE | BACK_LIGTH);
@@ -114,6 +161,12 @@ static void LCDWrite4Bits(char dato, uint8_t rs) {
 	return;
 }
 
+/**
+  * @brief	Escribo 8 bits por el puerto destinado al display.
+  * @param  Dato que escribo, 1 byte.
+  * @param  Indicador si es un comando lo que se escribe o información, 1 byte.
+  * @retval None.
+  */
 static void LCDWrite8Bits(char dato, uint8_t rs) {
 
 	LCDWrite4Bits(dato & HIGH_NIBBLE, rs);

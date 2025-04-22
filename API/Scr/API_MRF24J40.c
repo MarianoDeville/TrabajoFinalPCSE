@@ -492,6 +492,7 @@ static void SetDeviceAddress(void);
 static void SetChannel(void);
 static void SetDeviceMACAddress(void);
 
+/* Funciones públicas --------------------------------------------------------*/
 /**
  * @brief  Inicialización del módulo MRF24J40MA
  * @param  None
@@ -578,8 +579,9 @@ static void InicializoVariables(void) {
 }
 
 /**
- * @brief  Escribo de en registro de 1 byte un dato de 1 byte
- * @param  Dirección del registro - 1 byte, dato - 1 byte
+ * @brief  Escribo en registro de 1 byte un dato de 1 byte
+ * @param  Dirección del registro - 1 byte
+ * @param  Dato - 1 byte
  * @retval None
  */
 static void SetShortAddr(uint8_t reg_address, uint8_t valor) {
@@ -594,7 +596,8 @@ static void SetShortAddr(uint8_t reg_address, uint8_t valor) {
 
 /**
  * @brief  Leo en registro de 1 byte un dato de 1 byte
- * @param  Dirección del registro - 1 byte, dato - 1 byte
+ * @param  Dirección del registro - 1 byte
+ * @param  Dato - 1 byte
  * @retval Valor devuelto por el módulo - 1 byte
  */
 static uint8_t GetShortAddr(uint8_t reg_address) {
@@ -610,7 +613,8 @@ static uint8_t GetShortAddr(uint8_t reg_address) {
 
 /**
  * @brief  Escribo de en registro de 2 bytes un dato de 1 byte
- * @param  Dirección del registro - 2 bytes, dato - 1 byte
+ * @param  Dirección del registro - 2 bytes
+ * @param  Dato - 1 byte
  * @retval None
  */
 static void SetLongAddr(uint16_t reg_address, uint8_t valor) {
@@ -625,7 +629,8 @@ static void SetLongAddr(uint16_t reg_address, uint8_t valor) {
 
 /**
  * @brief  Leo en registro de 2 bytes un dato de 1 byte
- * @param  Dirección del registro - 2 bytes, dato - 1 byte
+ * @param  Dirección del registro - 2 bytes
+ * @param  Dato - 1 byte
  * @retval Valor devuelto por el módulo - 1 byte
  */
 static uint8_t GetLongAddr(uint16_t reg_address) {
@@ -686,11 +691,11 @@ static void SetDeviceMACAddress(void) {
 /* Funciones públicas --------------------------------------------------------*/
 
 /**
- * @brief
- * @param  None
- * @retval None
+ * @brief   Paso por referencia la dirección del mensaje a enviar.
+ * @param   Puntero al mensaje.
+ * @retval  None
  */
-void MRF24SetMensajeSalida(const char * mensaje) {
+ void MRF24SetMensajeSalida(const char * mensaje) {
 
     mrf24_data_out.buffer_salida = mensaje;
     mrf24_data_out.largo_mensaje = (uint8_t) strlen(mensaje);
@@ -698,9 +703,9 @@ void MRF24SetMensajeSalida(const char * mensaje) {
 }
 
 /**
- * @brief
- * @param  None
- * @retval None
+ * @brief   Configuro la dirección corta del dispositivo con el que me comunicaré.
+ * @param   Dirección corta del dispositivo - 2 bytes.
+ * @retval  None
  */
 void MRF24SetDireccionDestino(uint16_t direccion) {
 
@@ -709,9 +714,9 @@ void MRF24SetDireccionDestino(uint16_t direccion) {
 }
 
 /**
- * @brief
- * @param  None
- * @retval None
+ * @brief   Configuro la PANID del dispositivo con el que me comunicaré.
+ * @param   Dirección PANID de dos bytes.
+ * @retval  None
  */
 void MRF24SetPANIDDestino(uint16_t panid) {
 
@@ -720,9 +725,9 @@ void MRF24SetPANIDDestino(uint16_t panid) {
 }
 
 /**
- * @brief  Envío la información almacenada en la estructura de salida
- * @param  None
- * @retval None
+ * @brief   Envío la información almacenada en la estructura de salida
+ * @param   None
+ * @retval  None
  */
 void MRF24TransmitirDato(void) {
 
@@ -748,9 +753,9 @@ void MRF24TransmitirDato(void) {
 }
 
 /**
- * @brief  Consulto si se levantó la bandera indicando la llegada de un mensaje.
- * @param  None
- * @retval Booleano indicando si hay un mensaje.
+ * @brief   Consulto si se levantó la bandera indicando la llegada de un mensaje.
+ * @param   None
+ * @retval  Booleano indicando si hay un mensaje.
  */
 bool_t MRF24IsNewMsg(void) {
 
@@ -758,9 +763,9 @@ bool_t MRF24IsNewMsg(void) {
 }
 
 /**
- * @brief  Recibir un paquete y dejarlo en el bufer de entrada de mrf24_data_config
- * @param  None
- * @retval None
+ * @brief   Recibir un paquete y dejarlo en el bufer de entrada de mrf24_data_config
+ * @param   None
+ * @retval  None
  */
 void MRF24ReciboPaquete(void) {
 
@@ -780,26 +785,21 @@ void MRF24ReciboPaquete(void) {
 }
 
 /**
- * @brief
- * @param  None
- * @retval
+ * @brief   Devuelvo un puntero al mensaje recibido por RF.
+ * @param   None
+ * @retval  Puntero a la cadena recibida.
  */
-uint8_t * MRF24GetMensajeEntrada(void){
+uint8_t * MRF24GetMensajeEntrada(void) {
 
 	return mrf24_data_in.buffer_entrada;
 }
 
-
-
-
 /**
- * @brief  Buscar dispositivos en la cercanía
- * @param  None
- * @retval None
+ * @brief   Obtengo el PANID en el que estoy.
+ * @param   None
+ * @retval  La dirección de 2 bytes de mi PANID
  */
-void MRF24BuscarDispositivos(void) {                                                    // acá debería devolver una estructura con los dispositivos encontrados
+uint16_t MRF24GetMiPANID(void) {
 
-//	SetChannel(DEF_CH);
-//	Envio_Dato(0x1234,BROADCAST,rs_str);
-	return;
+	return mrf24_data_config.my_panid;
 }
