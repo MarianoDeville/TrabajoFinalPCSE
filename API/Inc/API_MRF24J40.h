@@ -42,18 +42,21 @@ typedef enum {
 /* Respuesta de las funciones ------------------------------------------------*/
 typedef enum {
 
+	INICIALIZANDO,
+	INICIALIZACION_OK,
 	TRANSMISION_REALIZADA,
 	TIME_OUT_OCURRIDO,
 	OPERACION_NO_REALIZADA,
-	OPERACION_REALIZADA
-} MRF24_StateTypeDef;
+	OPERACION_REALIZADA,
+	ERROR_INESPERADO,
+} MRF24_State_t;
 
 /* Prototipo de funciones públicas -------------------------------------------*/
-MRF24_StateTypeDef MRF24J40Init(void);
-void MRF24SetMensajeSalida(const char * mensaje);
+MRF24_State_t MRF24J40Init(void);
+bool_t MRF24SetMensajeSalida(const char * mensaje);
 void MRF24SetDireccionDestino(uint16_t direccion);
 void MRF24SetPANIDDestino(uint16_t panid);
-void MRF24TransmitirDato(void);
+MRF24_State_t MRF24TransmitirDato(void);
 bool_t MRF24IsNewMsg(void);
 void MRF24ReciboPaquete(void);
 uint8_t * MRF24GetMensajeEntrada(void);

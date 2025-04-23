@@ -34,6 +34,7 @@
 #define FCS_LQI_RSSI		(0x04)
 
 /* Variables privadas --------------------------------------------------------*/
+static MRF24_State_t estadoActual;
 /* MAC address por defecto del dispositivo */
 static const uint8_t default_mac_address[] = {0x11,
                                               0x28,
@@ -484,6 +485,7 @@ enum {	EADR0 = 0x05,
 
 /* Prototipo de funciones privadas -------------------------------------------*/
 static void InicializoVariables(void);
+static MRF24_State_t InicializoMRF24(void);
 static void SetShortAddr(uint8_t reg_address, uint8_t valor);
 static void SetLongAddr(uint16_t reg_address, uint8_t valor);
 static uint8_t GetShortAddr(uint8_t reg_address);
@@ -492,22 +494,48 @@ static void SetDeviceAddress(void);
 static void SetChannel(void);
 static void SetDeviceMACAddress(void);
 
-/* Funciones públicas --------------------------------------------------------*/
+/* Funciones privadas --------------------------------------------------------*/
 /**
- * @brief  Inicialización del módulo MRF24J40MA
+ * @brief  Inicialización de variables de configuración por defecto.
  * @param  None
  * @retval None
  */
-MRF24_StateTypeDef MRF24J40Init(void) {
+static void InicializoVariables(void) {
+
+	estadoActual = INICIALIZANDO;
+    for(int i = 0; i < 16; i++){
+
+        if(i < 8)
+            mrf24_data_config.my_mac[i] = default_mac_address[i];
+        mrf24_data_config.security_key[i] = default_security_key[i];
+    }
+    mrf24_data_config.sequence_number = DEFAULT_SEC_NUMBER;
+    mrf24_data_config.my_channel = DEFAULT_CHANNEL;
+    mrf24_data_config.get_new_msg = false;
+    mrf24_data_config.put_new_msg = false;
+    mrf24_data_config.my_panid = MY_DEFAULT_PAN_ID;
+    mrf24_data_config.my_address = MY_DEFAULT_ADDRESS;
+    mrf24_data_in.source_address = VACIO;
+    mrf24_data_in.source_panid = VACIO;
+    mrf24_data_in.tamano_mensaje = VACIO;
+    mrf24_data_in.buffer_entrada[0] = VACIO;
+    mrf24_data_out.destinity_panid = VACIO;
+    mrf24_data_out.destinity_address = VACIO;
+    mrf24_data_out.largo_mensaje = VACIO;
+    mrf24_data_out.buffer_salida = NULL;
+    return;
+}
+
+/**
+ * @brief  Inicialización del módulo MRF24J40MA
+ * @param  None
+ * @retval Estado de la operación
+ */
+static MRF24_State_t InicializoMRF24(void) {
 
     uint8_t lectura;
     delayNoBloqueanteData delay_time_out;
     DelayInit(&delay_time_out, MRF_TIME_OUT);
-    InicializoVariables();
-    InicializoPines();
-    delay_t(1);
-    SetResetPin(1);
-    delay_t(1);
     SetShortAddr(SOFTRST, RSTPWR | RSTBB | RSTMAC);
     DelayReset(&delay_time_out);
 
@@ -544,39 +572,21 @@ MRF24_StateTypeDef MRF24J40Init(void) {
 	SetChannel();
 	SetShortAddr(RXMCR, VACIO);
 	(void)GetShortAddr(INTSTAT);
-	return OPERACION_REALIZADA;
+	return INICIALIZACION_OK;
 }
 
-/* Funciones privadas --------------------------------------------------------*/
-/**
- * @brief  Inicialización de variables de configuración por defecto.
- * @param  None
- * @retval None
- */
-static void InicializoVariables(void) {
 
-    for(int i = 0; i < 16; i++){
 
-        if(i < 8)
-            mrf24_data_config.my_mac[i] = default_mac_address[i];
-        mrf24_data_config.security_key[i] = default_security_key[i];
-    }
-    mrf24_data_config.sequence_number = DEFAULT_SEC_NUMBER;
-    mrf24_data_config.my_channel = DEFAULT_CHANNEL;
-    mrf24_data_config.get_new_msg = false;
-    mrf24_data_config.put_new_msg = false;
-    mrf24_data_config.my_panid = MY_DEFAULT_PAN_ID;
-    mrf24_data_config.my_address = MY_DEFAULT_ADDRESS;
-    mrf24_data_in.source_address = VACIO;
-    mrf24_data_in.source_panid = VACIO;
-    mrf24_data_in.tamano_mensaje = VACIO;
-    mrf24_data_in.buffer_entrada[0] = VACIO;
-    mrf24_data_out.destinity_panid = VACIO;
-    mrf24_data_out.destinity_address = VACIO;
-    mrf24_data_out.largo_mensaje = VACIO;
-    mrf24_data_out.buffer_salida = NULL;
-    return;
-}
+
+
+
+
+
+
+
+
+
+
 
 /**
  * @brief  Escribo en registro de 1 byte un dato de 1 byte
@@ -688,18 +698,41 @@ static void SetDeviceMACAddress(void) {
 	return;
 }
 
+
+
+
+
+
+
 /* Funciones públicas --------------------------------------------------------*/
+/**
+ * @brief  Inicialización del módulo MRF24J40MA
+ * @param  None
+ * @retval Estado de la operación
+ */
+MRF24_State_t MRF24J40Init(void) {
+
+    InicializoVariables();
+    InicializoPines();
+    delay_t(1);
+    SetResetPin(1);
+    delay_t(1);
+    estadoActual = InicializoMRF24();
+    return estadoActual;
+}
 
 /**
  * @brief   Paso por referencia la dirección del mensaje a enviar.
  * @param   Puntero al mensaje.
- * @retval  None
+ * @retval  Estado de la operación
  */
- void MRF24SetMensajeSalida(const char * mensaje) {
+ bool_t MRF24SetMensajeSalida(const char * mensaje) {
 
-    mrf24_data_out.buffer_salida = mensaje;
-    mrf24_data_out.largo_mensaje = (uint8_t) strlen(mensaje);
-    return;
+	if(strlen(mensaje) == VACIO)
+		return false;
+	mrf24_data_out.buffer_salida = mensaje;
+	mrf24_data_out.largo_mensaje = (uint8_t) strlen(mensaje);
+	return true;
 }
 
 /**
@@ -727,10 +760,12 @@ void MRF24SetPANIDDestino(uint16_t panid) {
 /**
  * @brief   Envío la información almacenada en la estructura de salida
  * @param   None
- * @retval  None
+ * @retval  Estado de la operación
  */
-void MRF24TransmitirDato(void) {
+MRF24_State_t MRF24TransmitirDato(void) {
 
+	if(estadoActual != INICIALIZACION_OK)
+		return OPERACION_NO_REALIZADA;
 	uint8_t pos_memoria = 0;
 	uint8_t largo_cabecera = HEAD_LENGTH;
 	SetLongAddr(pos_memoria++, largo_cabecera);
@@ -749,7 +784,7 @@ void MRF24TransmitirDato(void) {
 	}
     SetLongAddr(pos_memoria++, VACIO);
 	SetShortAddr(TXNCON, TXNACKREQ | TXNTRIG);
-	return;
+	return OPERACION_REALIZADA;
 }
 
 /**

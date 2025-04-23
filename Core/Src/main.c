@@ -60,7 +60,7 @@ int main(void) {
 		Error_Handler();
 	LCDInint();
 
-	if(MRF24J40Init() == TIME_OUT_OCURRIDO)
+	if(MRF24J40Init() != INICIALIZACION_OK)
 		Error_Handler();
 	UARTReceiveStringSize(&puerto_UART1, RX_MSG_SIZE);
 	debounceData_t boton1;
