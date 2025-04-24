@@ -17,16 +17,16 @@
 #include "API_MRF24J40_port.h"
 
 /* Definiciones de la configuración por defecto ------------------------------*/
-#define	DEFAULT_CHANNEL     CH_11
-#define DEFAULT_SEC_NUMBER  (0X01)
+#define	DEFAULT_CHANNEL		CH_11
+#define DEFAULT_SEC_NUMBER	(0X01)
 #define	MY_DEFAULT_PAN_ID	(0x1234)
 #define	MY_DEFAULT_ADDRESS	(0x1111)
 
-#define HEAD_LENGTH         (0X08)
-#define WRITE_16_BITS       (0X8010)
-#define READ_16_BITS        (0X8000)
-#define WRITE_8_BITS        (0x01)
-#define READ_8_BITS         (0x7E)
+#define HEAD_LENGTH			(0X08)
+#define WRITE_16_BITS		(0X8010)
+#define READ_16_BITS		(0X8000)
+#define WRITE_8_BITS		(0x01)
+#define READ_8_BITS			(0x7E)
 #define SHIFT_LONG_ADDR		(0X05)
 #define SHIFT_SHORT_ADDR	(0X01)
 #define SHIFT_BYTE			(0X08)
@@ -137,7 +137,7 @@ enum {	EADR0 = 0x05,
 #define	TXSTBL			(0x2E)
 #define	RXSR			(0x30)
 #define	INTSTAT			(0x31)
-#define MRFINTCON       (0x32)
+#define MRFINTCON		(0x32)
 #define	GPIO			(0x33)
 #define	TRISGPIO		(0x34)
 #define	SLPACK			(0x35)
@@ -501,27 +501,27 @@ static void SetDeviceMACAddress(void);
  */
 static void InicializoVariables(void) {
 
-    for(int i = 0; i < SEC_KEY_SIZE; i++){
+	for(int i = 0; i < SEC_KEY_SIZE; i++){
 
-        if(i < LARGE_MAC_SIZE)
-            mrf24_data_config.my_mac[i] = default_mac_address[i];
-        mrf24_data_config.security_key[i] = default_security_key[i];
-    }
-    mrf24_data_config.sequence_number = DEFAULT_SEC_NUMBER;
-    mrf24_data_config.my_channel = DEFAULT_CHANNEL;
-    mrf24_data_config.get_new_msg = false;
-    mrf24_data_config.put_new_msg = false;
-    mrf24_data_config.my_panid = MY_DEFAULT_PAN_ID;
-    mrf24_data_config.my_address = MY_DEFAULT_ADDRESS;
-    mrf24_data_in.source_address = VACIO;
-    mrf24_data_in.source_panid = VACIO;
-    mrf24_data_in.tamano_mensaje = VACIO;
-    mrf24_data_in.buffer_entrada[0] = VACIO;
-    mrf24_data_out.destinity_panid = VACIO;
-    mrf24_data_out.destinity_address = VACIO;
-    mrf24_data_out.largo_mensaje = VACIO;
-    mrf24_data_out.buffer_salida = NULL;
-    return;
+		if(i < LARGE_MAC_SIZE)
+			mrf24_data_config.my_mac[i] = default_mac_address[i];
+		mrf24_data_config.security_key[i] = default_security_key[i];
+	}
+	mrf24_data_config.sequence_number = DEFAULT_SEC_NUMBER;
+	mrf24_data_config.my_channel = DEFAULT_CHANNEL;
+	mrf24_data_config.get_new_msg = false;
+	mrf24_data_config.put_new_msg = false;
+	mrf24_data_config.my_panid = MY_DEFAULT_PAN_ID;
+	mrf24_data_config.my_address = MY_DEFAULT_ADDRESS;
+	mrf24_data_in.source_address = VACIO;
+	mrf24_data_in.source_panid = VACIO;
+	mrf24_data_in.tamano_mensaje = VACIO;
+	mrf24_data_in.buffer_entrada[0] = VACIO;
+	mrf24_data_out.destinity_panid = VACIO;
+	mrf24_data_out.destinity_address = VACIO;
+	mrf24_data_out.largo_mensaje = VACIO;
+	mrf24_data_out.buffer_salida = NULL;
+	return;
 }
 
 /**
@@ -531,42 +531,44 @@ static void InicializoVariables(void) {
  */
 static MRF24_State_t InicializoMRF24(void) {
 
-    uint8_t lectura;
-    delayNoBloqueanteData delay_time_out;
-    DelayInit(&delay_time_out, MRF_TIME_OUT);
-    SetShortAddr(SOFTRST, RSTPWR | RSTBB | RSTMAC);
-    DelayReset(&delay_time_out);
+	uint8_t lectura;
+	delayNoBloqueanteData delay_time_out;
+	DelayInit(&delay_time_out, MRF_TIME_OUT);
+	SetShortAddr(SOFTRST, RSTPWR | RSTBB | RSTMAC);
+	DelayReset(&delay_time_out);
 
-    do {
-        lectura = GetShortAddr(SOFTRST);
+	do {
+
+		lectura = GetShortAddr(SOFTRST);
 		if(DelayRead(&delay_time_out))
-	        return TIME_OUT_OCURRIDO;
-    }while((lectura & (RSTPWR | RSTBB | RSTMAC)) != VACIO);
-    delay_t(WAIT_1_MS);
-    SetShortAddr(RXFLUSH, RXFLUSH_RESET);
-    SetDeviceAddress();
-    SetDeviceMACAddress();
-    SetLongAddr(RFCON2, PLLEN);
-    SetLongAddr(RFCON3, P30dBm | P6_3dBm);
+			return TIME_OUT_OCURRIDO;
+	}while((lectura & (RSTPWR | RSTBB | RSTMAC)) != VACIO);
+	delay_t(WAIT_1_MS);
+	SetShortAddr(RXFLUSH, RXFLUSH_RESET);
+	SetDeviceAddress();
+	SetDeviceMACAddress();
+	SetLongAddr(RFCON2, PLLEN);
+	SetLongAddr(RFCON3, P30dBm | P6_3dBm);
 	SetLongAddr(RFCON6, TXFIL | _20MRECVR);
 	SetLongAddr(RFCON7, SLPCLK100KHZ);
 	SetLongAddr(RFCON8, RFVCO);
 	SetLongAddr(SLPCON1, CLKOUTDIS | SLPCLKDIV0);
-    SetShortAddr(BBREG2, CCA_MODE_1);
-    SetShortAddr(BBREG6, RSSIMODE2);
-    SetShortAddr(CCAEDTH, CCAEDTH2 | CCAEDTH1);
-    SetShortAddr(PACON2, FIFOEN | TXONTS2 | TXONTS1);
-    SetShortAddr(TXSTBL, RFSTBL3 | RFSTBL0 | MSIFS2 | MSIFS0);
-    DelayReset(&delay_time_out);
+	SetShortAddr(BBREG2, CCA_MODE_1);
+	SetShortAddr(BBREG6, RSSIMODE2);
+	SetShortAddr(CCAEDTH, CCAEDTH2 | CCAEDTH1);
+	SetShortAddr(PACON2, FIFOEN | TXONTS2 | TXONTS1);
+	SetShortAddr(TXSTBL, RFSTBL3 | RFSTBL0 | MSIFS2 | MSIFS0);
+	DelayReset(&delay_time_out);
 
-    do {
+	do {
+
 		lectura = GetLongAddr(RFSTATE);
 		if(DelayRead(&delay_time_out))
-	        return TIME_OUT_OCURRIDO;
+			return TIME_OUT_OCURRIDO;
 	}while(lectura != RX);
-    SetShortAddr(MRFINTCON, SLPIE_DIS | WAKEIE_DIS | HSYMTMRIE_DIS | SECIE_DIS | TXG2IE_DIS | TXNIE_DIS);
+	SetShortAddr(MRFINTCON, SLPIE_DIS | WAKEIE_DIS | HSYMTMRIE_DIS | SECIE_DIS | TXG2IE_DIS | TXNIE_DIS);
 	SetShortAddr(ACKTMOUT, DRPACK | MAWD5 | MAWD4 | MAWD3 | MAWD0);
- 	SetLongAddr(RFCON1, VCOOPT1 | VCOOPT0);
+	SetLongAddr(RFCON1, VCOOPT1 | VCOOPT0);
 	SetChannel();
 	SetShortAddr(RXMCR, VACIO);
 	(void)GetShortAddr(INTSTAT);
@@ -584,11 +586,11 @@ static void SetShortAddr(uint8_t reg_address, uint8_t valor) {
 	// Al escribir direcciones cortas (SHORT ADDRESS REGISTER) se comienza con el MSB
 	// en 0 indicando una dirección corta, 6 bits con la dirección del registro, y 1 bit
 	// indicando la lectura o escritura.
-    reg_address = (uint8_t) (reg_address << SHIFT_SHORT_ADDR) | WRITE_8_BITS;
-    SetCSPin(DISABLE);
+	reg_address = (uint8_t) (reg_address << SHIFT_SHORT_ADDR) | WRITE_8_BITS;
+	SetCSPin(DISABLE);
 	WriteByteSPIPort(reg_address);
 	WriteByteSPIPort(valor);
-    SetCSPin(ENABLE);
+	SetCSPin(ENABLE);
 	return;
 }
 
@@ -603,12 +605,12 @@ static uint8_t GetShortAddr(uint8_t reg_address) {
 	// Al escribir direcciones cortas (SHORT ADDRESS REGISTER) se comienza con el MSB
 	// en 0 indicando una dirección corta, 6 bits con la dirección del registro, y 1 bit
 	// indicando la lectura o escritura.
-   	uint8_t leido_spi = VACIO;
-    reg_address = (uint8_t) (reg_address << SHIFT_SHORT_ADDR) & READ_8_BITS;
-    SetCSPin(DISABLE);
-    WriteByteSPIPort(reg_address);
-    leido_spi = ReadByteSPIPort();
-    SetCSPin(ENABLE);
+	uint8_t leido_spi = VACIO;
+	reg_address = (uint8_t) (reg_address << SHIFT_SHORT_ADDR) & READ_8_BITS;
+	SetCSPin(DISABLE);
+	WriteByteSPIPort(reg_address);
+	leido_spi = ReadByteSPIPort();
+	SetCSPin(ENABLE);
 	return leido_spi;
 }
 
@@ -623,11 +625,11 @@ static void SetLongAddr(uint16_t reg_address, uint8_t valor) {
 	// Al escribir direcciones largas (LONG ADDRESS REGISTER) se comienza con el MSB
 	// en 1 indicando una dirección larga, 10 bits con la dirección del registro, y 1 bit
 	// indicando la lectura o escritura. En los 4 bits restantes (LSB) no importa el valor.
-    reg_address = (reg_address << SHIFT_LONG_ADDR) | WRITE_16_BITS;
-    SetCSPin(DISABLE);
-    Write2ByteSPIPort(reg_address);
+	reg_address = (reg_address << SHIFT_LONG_ADDR) | WRITE_16_BITS;
+	SetCSPin(DISABLE);
+	Write2ByteSPIPort(reg_address);
 	WriteByteSPIPort(valor);
-    SetCSPin(ENABLE);
+	SetCSPin(ENABLE);
 	return;
 }
 
@@ -643,11 +645,11 @@ static uint8_t GetLongAddr(uint16_t reg_address) {
 	// en 1 indicando una dirección larga, 10 bits con la dirección del registro, y 1 bit
 	// indicando la lectura o escritura. En los 4 bits restantes (LSB) no importa el valor.
 	uint8_t respuesta;
-    reg_address = (reg_address << SHIFT_LONG_ADDR) | READ_16_BITS;
-    SetCSPin(DISABLE);
-    Write2ByteSPIPort(reg_address);
+	reg_address = (reg_address << SHIFT_LONG_ADDR) | READ_16_BITS;
+	SetCSPin(DISABLE);
+	Write2ByteSPIPort(reg_address);
 	respuesta = ReadByteSPIPort();
-    SetCSPin(ENABLE);
+	SetCSPin(ENABLE);
 	return respuesta;
 }
 
@@ -686,12 +688,12 @@ static void SetDeviceAddress(void) {
  */
 static void SetDeviceMACAddress(void) {
 
-    long_mac_address = EADR0;
+	long_mac_address = EADR0;
 
-    for(int i = 0; i < 8; i++) {
+	for(int i = 0; i < 8; i++) {
 
-        SetShortAddr(long_mac_address++, mrf24_data_config.my_mac[i]);
-    }
+		SetShortAddr(long_mac_address++, mrf24_data_config.my_mac[i]);
+	}
 	return;
 }
 
@@ -703,13 +705,13 @@ static void SetDeviceMACAddress(void) {
  */
 MRF24_State_t MRF24J40Init(void) {
 
-    InicializoVariables();
-    InicializoPines();
-    delay_t(WAIT_1_MS);
-    SetResetPin(1);
-    delay_t(WAIT_1_MS);
-    estadoActual = InicializoMRF24();
-    return estadoActual;
+	InicializoVariables();
+	InicializoPines();
+	delay_t(WAIT_1_MS);
+	SetResetPin(1);
+	delay_t(WAIT_1_MS);
+	estadoActual = InicializoMRF24();
+	return estadoActual;
 }
 
 /**
@@ -735,8 +737,8 @@ MRF24_State_t MRF24SetDireccionDestino(uint16_t direccion) {
 
 	if(estadoActual != INICIALIZACION_OK)
 		return OPERACION_NO_REALIZADA;
-    mrf24_data_out.destinity_address = direccion;
-    return OPERACION_REALIZADA;
+	mrf24_data_out.destinity_address = direccion;
+	return OPERACION_REALIZADA;
 }
 
 /**
@@ -748,8 +750,8 @@ MRF24_State_t MRF24SetPANIDDestino(uint16_t panid) {
 
 	if(estadoActual != INICIALIZACION_OK)
 		return OPERACION_NO_REALIZADA;
-    mrf24_data_out.destinity_panid = panid;
-    return OPERACION_REALIZADA;
+	mrf24_data_out.destinity_panid = panid;
+	return OPERACION_REALIZADA;
 }
 
 /**
