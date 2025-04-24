@@ -26,7 +26,6 @@ void DebounceFSMInit(debounceData_t * antirrebote_boton_n) {
 	assert_param(antirrebote_boton_n);
 	antirrebote_boton_n->estadoActual = BUTTON_UP;
 	DelayInit(&antirrebote_boton_n->delay_anti_rebote, TIEMPO_ANTI_REBOTE);
-	antirrebote_boton_n->tecla_fue_presionada = false;
 }
 
 /**

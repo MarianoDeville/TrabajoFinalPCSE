@@ -5,7 +5,6 @@
  * @brief   Implementación driver módulo MRF24J40
  *******************************************************************************
  * @attention Driver independiente de la plataforma de uso y del compilardor.
- *            Escrito en C.
  *
  *******************************************************************************
  */
@@ -502,10 +501,9 @@ static void SetDeviceMACAddress(void);
  */
 static void InicializoVariables(void) {
 
-	estadoActual = INICIALIZANDO;
-    for(int i = 0; i < 16; i++){
+    for(int i = 0; i < SEC_KEY_SIZE; i++){
 
-        if(i < 8)
+        if(i < LARGE_MAC_SIZE)
             mrf24_data_config.my_mac[i] = default_mac_address[i];
         mrf24_data_config.security_key[i] = default_security_key[i];
     }
@@ -529,7 +527,7 @@ static void InicializoVariables(void) {
 /**
  * @brief  Inicialización del módulo MRF24J40MA
  * @param  None
- * @retval Estado de la operación
+ * @retval Estado de la operación (TIME_OUT_OCURRIDO, INICIALIZACION_OK)
  */
 static MRF24_State_t InicializoMRF24(void) {
 
@@ -544,7 +542,7 @@ static MRF24_State_t InicializoMRF24(void) {
 		if(DelayRead(&delay_time_out))
 	        return TIME_OUT_OCURRIDO;
     }while((lectura & (RSTPWR | RSTBB | RSTMAC)) != VACIO);
-    delay_t(1);
+    delay_t(WAIT_1_MS);
     SetShortAddr(RXFLUSH, RXFLUSH_RESET);
     SetDeviceAddress();
     SetDeviceMACAddress();
@@ -574,19 +572,6 @@ static MRF24_State_t InicializoMRF24(void) {
 	(void)GetShortAddr(INTSTAT);
 	return INICIALIZACION_OK;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 /**
  * @brief  Escribo en registro de 1 byte un dato de 1 byte
@@ -664,7 +649,7 @@ static void SetChannel(void) {
 	SetLongAddr(RFCON0, mrf24_data_config.my_channel);
 	SetShortAddr(RFCTL, RFRST_HOLD);
 	SetShortAddr(RFCTL, VACIO);
-	delay_t(1);
+	delay_t(WAIT_1_MS);
 	return;
 }
 
@@ -683,9 +668,9 @@ static void SetDeviceAddress(void) {
 }
 
 /**
- * @brief  Seteo en el módulo la dirección mac guardada en mrf24_data_config
- * @param  None
- * @retval None
+ * @brief  Seteo en el módulo la dirección mac guardada en mrf24_data_config.
+ * @param  None.
+ * @retval None.
  */
 static void SetDeviceMACAddress(void) {
 
@@ -698,25 +683,19 @@ static void SetDeviceMACAddress(void) {
 	return;
 }
 
-
-
-
-
-
-
 /* Funciones públicas --------------------------------------------------------*/
 /**
- * @brief  Inicialización del módulo MRF24J40MA
- * @param  None
- * @retval Estado de la operación
+ * @brief  Inicialización del módulo MRF24J40MA.
+ * @param  None.
+ * @retval Estado de la operación (TIME_OUT_OCURRIDO, INICIALIZACION_OK).
  */
 MRF24_State_t MRF24J40Init(void) {
 
     InicializoVariables();
     InicializoPines();
-    delay_t(1);
+    delay_t(WAIT_1_MS);
     SetResetPin(1);
-    delay_t(1);
+    delay_t(WAIT_1_MS);
     estadoActual = InicializoMRF24();
     return estadoActual;
 }
@@ -724,43 +703,47 @@ MRF24_State_t MRF24J40Init(void) {
 /**
  * @brief   Paso por referencia la dirección del mensaje a enviar.
  * @param   Puntero al mensaje.
- * @retval  Estado de la operación
+ * @retval  Estado de la operación (ERROR_INESPERADO, OPERACION_REALIZADA).
  */
- bool_t MRF24SetMensajeSalida(const char * mensaje) {
+MRF24_State_t MRF24SetMensajeSalida(const char * mensaje) {
 
-	if(strlen(mensaje) == VACIO)
-		return false;
+	if(strlen(mensaje) == VACIO || estadoActual != INICIALIZACION_OK)
+		return ERROR_INESPERADO;
 	mrf24_data_out.buffer_salida = mensaje;
 	mrf24_data_out.largo_mensaje = (uint8_t) strlen(mensaje);
-	return true;
+	return OPERACION_REALIZADA;
 }
 
 /**
  * @brief   Configuro la dirección corta del dispositivo con el que me comunicaré.
  * @param   Dirección corta del dispositivo - 2 bytes.
- * @retval  None
+ * @retval  Estado de la operación (OPERACION_NO_REALIZADA, OPERACION_REALIZADA).
  */
-void MRF24SetDireccionDestino(uint16_t direccion) {
+MRF24_State_t MRF24SetDireccionDestino(uint16_t direccion) {
 
+	if(estadoActual != INICIALIZACION_OK)
+		return OPERACION_NO_REALIZADA;
     mrf24_data_out.destinity_address = direccion;
-    return;
+    return OPERACION_REALIZADA;
 }
 
 /**
  * @brief   Configuro la PANID del dispositivo con el que me comunicaré.
  * @param   Dirección PANID de dos bytes.
- * @retval  None
+ * @retval  Estado de la operación (OPERACION_NO_REALIZADA, OPERACION_REALIZADA).
  */
-void MRF24SetPANIDDestino(uint16_t panid) {
+MRF24_State_t MRF24SetPANIDDestino(uint16_t panid) {
 
+	if(estadoActual != INICIALIZACION_OK)
+		return OPERACION_NO_REALIZADA;
     mrf24_data_out.destinity_panid = panid;
-    return;
+    return OPERACION_REALIZADA;
 }
 
 /**
- * @brief   Envío la información almacenada en la estructura de salida
- * @param   None
- * @retval  Estado de la operación
+ * @brief   Envío la información almacenada en la estructura de salida.
+ * @param   None.
+ * @retval  Estado de la operación (OPERACION_NO_REALIZADA, TRANSMISION_REALIZADA).
  */
 MRF24_State_t MRF24TransmitirDato(void) {
 
@@ -784,26 +767,33 @@ MRF24_State_t MRF24TransmitirDato(void) {
 	}
     SetLongAddr(pos_memoria++, VACIO);
 	SetShortAddr(TXNCON, TXNACKREQ | TXNTRIG);
-	return OPERACION_REALIZADA;
+	return TRANSMISION_REALIZADA;
 }
 
 /**
  * @brief   Consulto si se levantó la bandera indicando la llegada de un mensaje.
- * @param   None
- * @retval  Booleano indicando si hay un mensaje.
+ * @param   None.
+ * @retval  Estado de la operación (ERROR_INESPERADO, MSG_PRESENTE, MSG_NO_PRESENTE).
  */
-bool_t MRF24IsNewMsg(void) {
+volatile MRF24_State_t MRF24IsNewMsg(void) {
 
-	return !IsMRF24Interrup();
+	if(estadoActual != INICIALIZACION_OK)
+		return ERROR_INESPERADO;
+
+	if(!IsMRF24Interrup())
+		return MSG_PRESENTE;
+	return MSG_NO_PRESENTE;
 }
 
 /**
- * @brief   Recibir un paquete y dejarlo en el bufer de entrada de mrf24_data_config
- * @param   None
- * @retval  None
+ * @brief   Recibir un paquete y dejarlo en el bufer de entrada de mrf24_data_config.
+ * @param   None.
+ * @retval  Estado de la operación (OPERACION_NO_REALIZADA, MSG_LEIDO).
  */
-void MRF24ReciboPaquete(void) {
+MRF24_State_t MRF24ReciboPaquete(void) {
 
+	if(estadoActual != INICIALIZACION_OK)
+		return OPERACION_NO_REALIZADA;
 	uint8_t index;
 	uint8_t largo_mensaje;
 	SetLongAddr(BBREG1, RXDECINV);
@@ -816,12 +806,12 @@ void MRF24ReciboPaquete(void) {
 	}
 	SetLongAddr(BBREG1, VACIO);
 	(void)GetShortAddr(INTSTAT);
-	return;
+	return MSG_LEIDO;
 }
 
 /**
  * @brief   Devuelvo un puntero al mensaje recibido por RF.
- * @param   None
+ * @param   None.
  * @retval  Puntero a la cadena recibida.
  */
 uint8_t * MRF24GetMensajeEntrada(void) {
@@ -831,8 +821,8 @@ uint8_t * MRF24GetMensajeEntrada(void) {
 
 /**
  * @brief   Obtengo el PANID en el que estoy.
- * @param   None
- * @retval  La dirección de 2 bytes de mi PANID
+ * @param   None.
+ * @retval  La dirección de 2 bytes de mi PANID.
  */
 uint16_t MRF24GetMiPANID(void) {
 

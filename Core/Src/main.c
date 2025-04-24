@@ -22,10 +22,8 @@
 
 /* Private define ------------------------------------------------------------*/
 #define LOW_END_ADDR	(0x1112)
-#define	RX_MSG_SIZE		1
 #define INDEX_CERO		0
-#define CADENA_SIZE		40
-#define RETORNO_CARRO	'\r'
+#define CADENA_SIZE		20
 
 /* Private variables ---------------------------------------------------------*/
 I2C_HandleTypeDef hi2c3;
@@ -33,8 +31,13 @@ SPI_HandleTypeDef hspi3;
 UART_HandleTypeDef huart2;
 UART_HandleTypeDef huart5;
 puerto_UART puerto_UART1;
+static 	datosFSMUART_t dataFSMUART;
+static char mensajeUART[CADENA_SIZE];
+static 	debounceData_t boton1;
 
 /* Private function prototypes -----------------------------------------------*/
+static void MensajesEntrantesUART(void);
+static void CheckBoton(void);
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 static void MX_USART2_UART_Init(void);
@@ -47,7 +50,6 @@ static void MX_SPI3_Init(void);
   */
 int main(void) {
 
-	char mensaje[CADENA_SIZE];
 	HAL_Init();
 	SystemClock_Config();
 	MX_GPIO_Init();
@@ -55,15 +57,14 @@ int main(void) {
 	MX_I2C3_Init();
 	MX_SPI3_Init();
 
-	memset(mensaje, VACIO, sizeof(mensaje));
 	if(!UARTtInit(&puerto_UART1, &huart5))
 		Error_Handler();
+	UARTReceiveStringSize(&puerto_UART1, RX_MSG_SIZE);
+	UARTFSMInit(&dataFSMUART, &puerto_UART1, mensajeUART, CADENA_SIZE);
 	LCDInint();
 
 	if(MRF24J40Init() != INICIALIZACION_OK)
 		Error_Handler();
-	UARTReceiveStringSize(&puerto_UART1, RX_MSG_SIZE);
-	debounceData_t boton1;
 	DebounceFSMInit(&boton1);
 	MRF24SetDireccionDestino(LOW_END_ADDR);
 	MRF24SetPANIDDestino(MRF24GetMiPANID());
@@ -71,28 +72,10 @@ int main(void) {
 
 	while(1) {
 
-		if(UARTIsNewMessage(&puerto_UART1)) {
+		CheckBoton();
+		MensajesEntrantesUART();
 
-			if(puerto_UART1.rx_buff[INDEX_CERO] == RETORNO_CARRO) {
-
-				UARTSendString(&puerto_UART1, (const uint8_t *)CRLF);
-				MRF24SetMensajeSalida(mensaje);
-				MRF24TransmitirDato();
-				memset(mensaje, VACIO, sizeof(mensaje));
-				LCDClearLinea(COMIENZO_1_LINEA);
-			} else {
-
-				strcat(mensaje, (const char *) puerto_UART1.rx_buff);
-				UARTSendString(&puerto_UART1, puerto_UART1.rx_buff);
-
-				if(strlen(mensaje) == 1)
-					LCDClearLinea(COMIENZO_1_LINEA);
-				LCDGoto(COMIENZO_1_LINEA);
-				LCDWriteString(mensaje);
-			}
-		}
-
-		if(MRF24IsNewMsg()) {
+		if(MRF24IsNewMsg() == MSG_PRESENTE) {
 
 			MRF24ReciboPaquete();
 			LCDClearLinea(COMIENZO_2_LINEA);
@@ -103,43 +86,103 @@ int main(void) {
 
 			if(!strcmp((char *)MRF24GetMensajeEntrada(),"CMD:PLV"))
 				HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, ENCENDIDO);
-
 			else if(!strcmp((char *)MRF24GetMensajeEntrada(),"CMD:ALV"))
 				HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, APAGADO);
 		}
+	}
+}
 
-		switch(DebounceFSMUpdate(&boton1, HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin))) {
+/**
+  * @brief  Manejo de los mensajes entrantes por la UART
+  * @retval
+  */
+static void MensajesEntrantesUART(void) {
 
-			case PRESIONO_BOTON:
+	switch(CheckMsgUART(&dataFSMUART)) {
 
-				MRF24SetMensajeSalida("CMD:PLA");
-				MRF24TransmitirDato();
-				break;
+		case COMIENZO_MSG:
 
-			case SUELTO_BOTON:
+			LCDClearLinea(COMIENZO_1_LINEA);
+			LCDGoto(COMIENZO_1_LINEA);
+			LCDWriteString(mensajeUART);
+			UARTSendString(&puerto_UART1, puerto_UART1.rx_buff);
+			break;
 
-				MRF24SetMensajeSalida("CMD:ALA");
-				MRF24TransmitirDato();
-				break;
+		case NUEVO_CARACTER:
 
-			case RUIDO:
+			LCDGoto(COMIENZO_1_LINEA);
+			LCDWriteString(mensajeUART);
+			UARTSendString(&puerto_UART1, puerto_UART1.rx_buff);
+			break;
 
-				UARTSendString(&puerto_UART1,  (const uint8_t *) "Ruido detectado en el pulsador." CRLF);
-				break;
+		case FINAL_MSG:
 
-			case ERROR_ANTI_REBOTE:
+			UARTSendString(&puerto_UART1, (const uint8_t *)CRLF);
+			MRF24SetMensajeSalida(mensajeUART);
+			MRF24TransmitirDato();
+			memset(mensajeUART, VACIO, sizeof(mensajeUART));
+			break;
 
-				UARTSendString(&puerto_UART1, (const uint8_t *) "Error al procesar el antirrebote." CRLF);
-				break;
+		case SIN_MSG:
 
-			case BOTON_SIN_CAMBIOS:
+			UARTSendString(&puerto_UART1, (const uint8_t *)CRLF);
+			LCDClearLinea(COMIENZO_1_LINEA);
+			break;
 
-				break;
+		case BUFFER_LLENO:
 
-			default:
+			LCDClearLinea(COMIENZO_1_LINEA);
+			LCDGoto(COMIENZO_1_LINEA);
+			LCDWriteString("Err-Buffer lleno");
+			break;
 
-				UARTSendString(&puerto_UART1, (const uint8_t *) "Error inesperado." CRLF);
-		}
+		case ESCUCHANDO:
+
+			break;
+
+		default:
+
+			UARTSendString(&puerto_UART1, (const uint8_t *) "Error inesperado." CRLF);
+	}
+}
+
+/**
+  * @brief  Manejo de las pulsaciones del botón
+  * @retval
+  */
+static void CheckBoton(void){
+
+	switch(DebounceFSMUpdate(&boton1, HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin))) {
+
+		case PRESIONO_BOTON:
+
+			MRF24SetMensajeSalida("CMD:PLA");
+			MRF24TransmitirDato();
+			break;
+
+		case SUELTO_BOTON:
+
+			MRF24SetMensajeSalida("CMD:ALA");
+			MRF24TransmitirDato();
+			break;
+
+		case RUIDO:
+
+			UARTSendString(&puerto_UART1,  (const uint8_t *) "Ruido detectado en el pulsador." CRLF);
+			break;
+
+		case ERROR_ANTI_REBOTE:
+
+			UARTSendString(&puerto_UART1, (const uint8_t *) "Error al procesar el antirrebote." CRLF);
+			break;
+
+		case BOTON_SIN_CAMBIOS:
+
+			break;
+
+		default:
+
+			UARTSendString(&puerto_UART1, (const uint8_t *) "Error inesperado." CRLF);
 	}
 }
 

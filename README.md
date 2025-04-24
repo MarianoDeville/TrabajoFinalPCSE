@@ -231,6 +231,23 @@ UART API
 		  * @retval Devuelvo la información del resultado de la transmisión.
 		  */
 		bool_t PutConfiguration(puerto_UART * data_port);
+		
+		/**
+		  * @brief	Inicializa las variables de la máuina de estado para la función anti rebote.
+		  * @param  Puntero a la estructura que contiene las variabes.
+		  * @param  Puntero a la estructura que contiene las variabes del puerto.
+		  * @param  Puntero al buffer de almacenamiento del mensaje entrante.
+		  * @retval
+		  */
+		void UARTFSMInit(datosFSMUART_t * datosFSM, puerto_UART * data_port, char * bufferEntrada, uint8_t bufferSize);
+		
+		/**
+		  * @brief	Utilizando una MEF compruebo el mensaje entrante, esperando un enter como
+		  * 		marca para el final de la cadena.
+		  * @param  Puntero a la estructura que contiene las variabes de la máquina de estados.
+		  * @retval	Devuelvo la información del llenado del buffer.
+		  */
+		estadoComunicacionUART_t CheckMsgUART(datosFSMUART_t * datosFSM);
 
 MRF24J40 API
 
@@ -246,6 +263,13 @@ MRF24J40 API
 		 */
 		 static void InicializoVariables(void);
  
+		 /**
+		 * @brief  Inicialización del módulo MRF24J40MA
+		 * @param  None
+		 * @retval Estado de la operación (TIME_OUT_OCURRIDO, INICIALIZACION_OK)
+		 */
+		static MRF24_State_t InicializoMRF24(void);
+
 		/**
 		 * @brief  Escribo en registro de 1 byte un dato de 1 byte
 		 * @param  Dirección del registro - 1 byte
@@ -301,59 +325,65 @@ MRF24J40 API
 
 	Funciones públicas:
 
+		 * @brief  Inicialización del módulo MRF24J40MA.
+		 * @param  None.
+		 * @retval Estado de la operación (TIME_OUT_OCURRIDO, INICIALIZACION_OK).
+		 */
+		MRF24_State_t MRF24J40Init(void)
+
 		/**
 		 * @brief   Paso por referencia la dirección del mensaje a enviar.
 		 * @param   Puntero al mensaje.
-		 * @retval  None
+		 * @retval  Estado de la operación (ERROR_INESPERADO, OPERACION_REALIZADA).
 		 */
 		 void MRF24SetMensajeSalida(const char * mensaje);
 
 		/**
 		 * @brief   Configuro la dirección corta del dispositivo con el que me comunicaré.
 		 * @param   Dirección corta del dispositivo - 2 bytes.
-		 * @retval  None
+		 * @retval  Estado de la operación (ERROR_INESPERADO, OPERACION_REALIZADA).
 		 */
 		void MRF24SetDireccionDestino(uint16_t direccion);
 
 		/**
 		 * @brief   Configuro la PANID del dispositivo con el que me comunicaré.
 		 * @param   Dirección PANID de dos bytes.
-		 * @retval  None
+		 * @retval  Estado de la operación (OPERACION_NO_REALIZADA, OPERACION_REALIZADA).
 		 */
 		void MRF24SetPANIDDestino(uint16_t panid);
 
 		/**
 		 * @brief   Envío la información almacenada en la estructura de salida
 		 * @param   None
-		 * @retval  None
+		 * @retval  Estado de la operación (OPERACION_NO_REALIZADA, TRANSMISION_REALIZADA).
 		 */
 		void MRF24TransmitirDato(void);
 
 		/**
 		 * @brief   Consulto si se levantó la bandera indicando la llegada de un mensaje.
 		 * @param   None
-		 * @retval  Booleano indicando si hay un mensaje.
+		 * @retval  Estado de la operación (ERROR_INESPERADO, MSG_PRESENTE, MSG_NO_PRESENTE).
 		 */
 		bool_t MRF24IsNewMsg(void);
 
 		/**
 		 * @brief   Recibir un paquete y dejarlo en el bufer de entrada de mrf24_data_config
 		 * @param   None
-		 * @retval  None
+		 * @retval  Estado de la operación (OPERACION_NO_REALIZADA, MSG_LEIDO).
 		 */
 		void MRF24ReciboPaquete(void);
 
 		/**
 		 * @brief   Devuelvo un puntero al mensaje recibido por RF.
-		 * @param   None
+		 * @param   None.
 		 * @retval  Puntero a la cadena recibida.
 		 */
 		uint8_t * MRF24GetMensajeEntrada(void);
 
 		/**
 		 * @brief   Obtengo el PANID en el que estoy.
-		 * @param   None
-		 * @retval  La dirección de 2 bytes de mi PANID
+		 * @param   None.
+		 * @retval  La dirección de 2 bytes de mi PANID.
 		 */
 		uint16_t MRF24GetMiPANID(void);
 

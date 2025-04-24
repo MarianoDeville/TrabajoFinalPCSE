@@ -38,11 +38,10 @@ typedef enum {
 } estadoPulsador_t;
 
 /**
- * Estructura defina para el manejo del antirrebote.
+ * Estructura definida para el manejo del antirrebote.
  */
 typedef struct {
 
-	bool_t tecla_fue_presionada;
 	debounceState_t estadoActual;
 	delayNoBloqueanteData delay_anti_rebote;
 } debounceData_t;

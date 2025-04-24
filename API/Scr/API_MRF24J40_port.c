@@ -64,7 +64,7 @@ void SetResetPin(bool_t estado){
  * @brief  Devuelvo el estado del pin interrup del módulo
  * @retval Booleano
  */
-bool_t IsMRF24Interrup(void) {
+volatile bool_t IsMRF24Interrup(void) {
 
 	return HAL_GPIO_ReadPin(MRF24_INTERRUP_GPIO_Port, MRF24_INTERRUP_Pin);
 }

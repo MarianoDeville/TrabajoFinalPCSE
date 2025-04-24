@@ -26,7 +26,7 @@ void InicializoPines(void);
 void SetCSPin(bool_t estado);
 void SetWakePin(bool_t estado);
 void SetResetPin(bool_t estado);
-bool_t IsMRF24Interrup(void);
+volatile bool_t IsMRF24Interrup(void);
 void WriteByteSPIPort(uint8_t dato);
 void Write2ByteSPIPort(uint16_t dato);
 uint8_t ReadByteSPIPort(void);
