@@ -87,7 +87,7 @@ void WriteByteSPIPort(uint8_t dato){
  */
 void Write2ByteSPIPort(uint16_t dato){
 
-	uint8_t dato_partido = (uint8_t) (dato >> 8);
+	uint8_t dato_partido = (uint8_t) (dato >> SHIFT_BYTE);
 	HAL_SPI_Transmit(&hspi3, &dato_partido, _1_BYTE, TIME_OUT_SPI);
 	dato_partido = (uint8_t) dato;
 	HAL_SPI_Transmit(&hspi3, &dato_partido, _1_BYTE, TIME_OUT_SPI);

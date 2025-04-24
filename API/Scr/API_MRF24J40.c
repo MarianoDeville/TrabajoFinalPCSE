@@ -581,6 +581,9 @@ static MRF24_State_t InicializoMRF24(void) {
  */
 static void SetShortAddr(uint8_t reg_address, uint8_t valor) {
 
+	// Al escribir direcciones cortas (SHORT ADDRESS REGISTER) se comienza con el MSB
+	// en 0 indicando una dirección corta, 6 bits con la dirección del registro, y 1 bit
+	// indicando la lectura o escritura.
     reg_address = (uint8_t) (reg_address << SHIFT_SHORT_ADDR) | WRITE_8_BITS;
     SetCSPin(DISABLE);
 	WriteByteSPIPort(reg_address);
@@ -597,6 +600,9 @@ static void SetShortAddr(uint8_t reg_address, uint8_t valor) {
  */
 static uint8_t GetShortAddr(uint8_t reg_address) {
 
+	// Al escribir direcciones cortas (SHORT ADDRESS REGISTER) se comienza con el MSB
+	// en 0 indicando una dirección corta, 6 bits con la dirección del registro, y 1 bit
+	// indicando la lectura o escritura.
    	uint8_t leido_spi = VACIO;
     reg_address = (uint8_t) (reg_address << SHIFT_SHORT_ADDR) & READ_8_BITS;
     SetCSPin(DISABLE);
@@ -614,6 +620,9 @@ static uint8_t GetShortAddr(uint8_t reg_address) {
  */
 static void SetLongAddr(uint16_t reg_address, uint8_t valor) {
 
+	// Al escribir direcciones largas (LONG ADDRESS REGISTER) se comienza con el MSB
+	// en 1 indicando una dirección larga, 10 bits con la dirección del registro, y 1 bit
+	// indicando la lectura o escritura. En los 4 bits restantes (LSB) no importa el valor.
     reg_address = (reg_address << SHIFT_LONG_ADDR) | WRITE_16_BITS;
     SetCSPin(DISABLE);
     Write2ByteSPIPort(reg_address);
@@ -630,6 +639,9 @@ static void SetLongAddr(uint16_t reg_address, uint8_t valor) {
  */
 static uint8_t GetLongAddr(uint16_t reg_address) {
 
+	// Al escribir direcciones largas (LONG ADDRESS REGISTER) se comienza con el MSB
+	// en 1 indicando una dirección larga, 10 bits con la dirección del registro, y 1 bit
+	// indicando la lectura o escritura. En los 4 bits restantes (LSB) no importa el valor.
 	uint8_t respuesta;
     reg_address = (reg_address << SHIFT_LONG_ADDR) | READ_16_BITS;
     SetCSPin(DISABLE);
@@ -761,11 +773,11 @@ MRF24_State_t MRF24TransmitirDato(void) {
 	SetLongAddr(pos_memoria++, (uint8_t) mrf24_data_out.destinity_address);
 	SetLongAddr(pos_memoria++, (uint8_t) (mrf24_data_out.destinity_address >> SHIFT_BYTE));
 
-    for(int8_t i = 0; i < mrf24_data_out.largo_mensaje; i++) {
+	for(int8_t i = 0; i < mrf24_data_out.largo_mensaje; i++) {
 
 		SetLongAddr(pos_memoria++, mrf24_data_out.buffer_salida[i]);
 	}
-    SetLongAddr(pos_memoria++, VACIO);
+	SetLongAddr(pos_memoria++, VACIO);
 	SetShortAddr(TXNCON, TXNACKREQ | TXNTRIG);
 	return TRANSMISION_REALIZADA;
 }

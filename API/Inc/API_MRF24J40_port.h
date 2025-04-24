@@ -18,6 +18,7 @@
 
 #define _1_BYTE			(0x01)
 #define _2_BYTES		(0x02)
+#define SHIFT_BYTE		(0X08)
 #define TIME_OUT_SPI	100
 
 
