@@ -1,6 +1,6 @@
-# TrabajoFinalPCSE
+# TrabajoFinalPCSE y PdM
 
-	Trabajo final para la materia protocolos de comunicación de la carrera especialización en sistemas embebidos.
+	Trabajo final para las materias protocolos de comunicación y programación de microcontroladores de la carrera especialización en sistemas embebidos.
 
 Objetivos
 	

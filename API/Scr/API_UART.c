@@ -197,6 +197,7 @@ estadoComunicacionUART_t CheckMsgUART(datosFSMUART_t * datosFSM) {
 
 		default:
 
+			datosFSM->estadoFSM = CADENA_VACIA;
 			return MSG_ERROR;
 		}
 	}
